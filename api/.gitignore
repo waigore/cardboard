@@ -1,0 +1,5 @@
+# dependencies
+/node_modules
+
+*.db
+!src/sequelize/cardboard.db
