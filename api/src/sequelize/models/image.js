@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
     filename: DataTypes.STRING,
     site: DataTypes.STRING,
+    fileUrl: DataTypes.STRING,
     tags: DataTypes.STRING,
     artists: DataTypes.STRING,
     characters: DataTypes.STRING,
