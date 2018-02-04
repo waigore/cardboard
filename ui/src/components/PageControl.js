@@ -2,39 +2,95 @@ import React from 'react';
 import { Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 
 class PageControl extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      from: 1,
+      to: 5,
+      total: props.total || 10,
+      active: 1
+    }
+
+    this.handlePaginationItemClick = this.handlePaginationItemClick.bind(this);
+  }
+
+  recalculatePages(currPage) {
+    let numItems = this.state.to - this.state.from;
+    let from = currPage - numItems/2;
+    let to = currPage + numItems/2;
+    if (from < 1) {
+      from = 1;
+      to = from + numItems;
+    }
+    else if (to > this.state.total) {
+      to = this.state.total;
+      from = to - numItems;
+    }
+    return {to, from}
+  }
+
+  handlePaginationItemClick(evt, itemVal) {
+    let {to, from} = this.recalculatePages(itemVal);
+    this.setState({
+      active: itemVal,
+      from: from,
+      to: to
+    })
+
+    if (this.props.onPageChanged) {
+      this.props.onPageChanged(itemVal);
+    }
+  }
+
+  handleNextItemClick(evt) {
+    let itemVal = this.state.active+1;
+    let {to, from} = this.recalculatePages(itemVal);
+    this.setState({
+      active: itemVal,
+      from: from,
+      to: to
+    })
+
+    if (this.props.onPageChanged) {
+      this.props.onPageChanged(itemVal);
+    }
+  }
+
+  handlePrevItemClick(evt) {
+    let itemVal = this.state.active-1;
+    let {to, from} = this.recalculatePages(itemVal);
+    this.setState({
+      active: itemVal,
+      from: from,
+      to: to
+    })
+
+    if (this.props.onPageChanged) {
+      this.props.onPageChanged(itemVal);
+    }
+  }
+
+  renderPaginationItems() {
+    return Array.from({length: this.state.to-this.state.from+1}, (x, i) => i+this.state.from).map(i => {
+      return (
+        <PaginationItem key={i} active={i == this.state.active}>
+          <PaginationLink onClick={ (evt) => this.handlePaginationItemClick(evt, i) }>
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      )
+    })
+  }
+
   render() {
     return (
       <Pagination style={{backgroundColor: 'transparent'}}>
-        <PaginationItem>
-          <PaginationLink previous href="#" />
+        <PaginationItem disabled={ this.state.active <= 1 }>
+          <PaginationLink previous onClick={ (evt) => this.handlePrevItemClick(evt) }/>
         </PaginationItem>
-        <PaginationItem>
-          <PaginationLink href="#">
-            1
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink href="#">
-            2
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink href="#">
-            3
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink href="#">
-            4
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink href="#">
-            5
-          </PaginationLink>
-        </PaginationItem>
-        <PaginationItem>
-          <PaginationLink next href="#" />
+        {this.renderPaginationItems()}
+        <PaginationItem disabled={ this.state.active >= this.state.total }>
+          <PaginationLink next onClick={ (evt) => this.handleNextItemClick(evt) }/>
         </PaginationItem>
       </Pagination>
     );

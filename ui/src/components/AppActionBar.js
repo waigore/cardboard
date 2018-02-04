@@ -25,12 +25,15 @@ class AppActionBar extends React.Component {
       values: []
     };
 
-    this.handleTagFilterSelectChange = this.handleTagFilterSelectChange.bind(this);
+    this.handleTagFilterSelectChanged = this.handleTagFilterSelectChanged.bind(this);
   }
 
-  handleTagFilterSelectChange(values) {
-    console.log("Selected:", values);
+  handleTagFilterSelectChanged(values) {
     this.setState({ values });
+
+    if (this.props.onSearchFilterChanged) {
+      this.props.onSearchFilterChanged(values);
+    }
   }
 
   render() {
@@ -49,7 +52,7 @@ class AppActionBar extends React.Component {
             style={{width: "250px", backgroundColor: 'transparent', borderColor: 'white' }}
             multi
             name="tag-filter"
-            onChange={this.handleTagFilterSelectChange}
+            onChange={this.handleTagFilterSelectChanged}
             removeSelected={true}
             options={[
               {value: 'persona5', label: 'persona5'},

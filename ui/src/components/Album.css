@@ -1,0 +1,21 @@
+.image-tag-container {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+
+.image-tag {
+  border-radius:8px;
+  color: #111;
+  background-color: #eee;
+  opacity: 0.6;
+  text-align: center;
+  border: 1px solid #eee;
+  padding: 2px;
+  margin: 2px;
+  font-size: 0.6em;
+  max-height: 20px;
+  cursor: pointer;
+}
