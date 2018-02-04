@@ -1,13 +1,14 @@
 const Image = require('../sequelize/models').Image;
 const SearchTerm = require('../sequelize/models').SearchTerm;
 const Op = require('sequelize').Op;
+const NoImagesFoundError = require('../exceptions').NoImagesFoundError;
 
 const threads = require('threads');
 const Pool = threads.Pool;
 const config  = threads.config;
 const spawn   = threads.spawn;
 
-const IMG_LIMIT = 30;
+const IMG_LIMIT = 50;
 
 // Set base paths to thread scripts
 config.set({
@@ -47,8 +48,8 @@ let formatTermToTag = function(searchTerm) {
 
 module.exports = {
   queueAllTags: function() {
-    return getAllSearchTerms()
 
+    return getAllSearchTerms()
     .then(terms => {
       return terms.map(term => {
         console.log('Mapping', term.name);
@@ -68,10 +69,12 @@ module.exports = {
       //let p = Promise.all(queuedTerms);
       //return p;
       return queuedTerms.reduce((promise, queuedTerm) => {
-        return promise.then(() => queuedTerm.resolve())
+        return promise.then(() => Promise.resolve(queuedTerm))
       }, Promise.resolve());
     })
-
+    .then(() => {
+      return {status: "OK"}
+    })
   },
 
   queueByRawTag: function(tag, limit) {
@@ -89,11 +92,32 @@ module.exports = {
       let dlJob2 = pool.run('download-image-worker.js')
         .send({identifiers: result.identifiers});
       */
-      let dlJob = pool.run('download-image-worker.js')
-        .send({identifiers: result.identifiers});
+      //let dlJob = pool.run('download-image-worker.js')
+      //  .send({identifiers: result.identifiers});
     });
     console.log("queued, returning " + tag);
     return tag;
+  },
+
+  startImageDownload: function() {
+    return Image.findAll({
+      where: {
+        status: 'INITIAL'
+      }
+    })
+    .then(images => {
+      if (images.length == 0) throw new NoImagesFoundError();
+      let imgIdentifiers = images.map(image => image.identifier);
+
+      let job1 = pool.run('download-image-worker.js')
+        .send({identifiers: imgIdentifiers.splice(imgIdentifiers.length/2)});
+
+      let job2 = pool.run('download-image-worker.js')
+        .send({identifiers: imgIdentifiers});
+    })
+    .catch(NoImagesFoundError, (e) => {
+      return {status: 'OK', identifiers: []}
+    })
   },
 
   findNewImages: function() {

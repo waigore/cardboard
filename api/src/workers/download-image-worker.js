@@ -7,24 +7,13 @@ const Op = require('sequelize').Op;
 
 const util = require('../util');
 
-let downloadImage = function(url, filename) {
-  return request(url, {encoding: null})
-    .then((body) => {
-      return fs.writeFile(filename, body, "binary");
-    })
-    .then(() => console.log('Done downloading ' + filename + '!'))
-    .catch(err => {
-      console.log("Error! " + err);
-      throw err;
-    });
-}
 
 let downloadImageWithResult = function(imgDl) {
   let millis = Math.random()*1000;
   return myMSleep(millis)
     .then((_) => {
       console.log('slept ' + millis + 'ms, downloading ' + imgDl.identifier);
-      return downloadImage(imgDl.url, imgDl.filename);
+      return util.downloadImage(imgDl.url, imgDl.filename);
     })
     .then(() => {
       return Image.update(
@@ -33,7 +22,7 @@ let downloadImageWithResult = function(imgDl) {
             identifier: imgDl.identifier
           }
         }
-      )
+      ).then(() => true)
     })
     .catch(err => {
       return Image.update(
@@ -42,7 +31,7 @@ let downloadImageWithResult = function(imgDl) {
             identifier: imgDl.identifier
           }
         }
-      )
+      ).then(() => false)
     });
 }
 
@@ -80,17 +69,33 @@ module.exports = function(input, done, progress) {
     return imgs.map(img => {
       let url = `https://danbooru.donmai.us${img.fileUrl}`;
       let outputPath = util.getOutputFolderPath();
+      let thumbnailPath = util.getThumbnailFolderPath();
       let filename = `${outputPath}/${img.filename}`;
+      let thumbnail = `${thumbnailPath}/${img.filename}`;
       return {
         identifier: img.identifier,
         url: url,
-        filename: filename
+        filename: filename,
+        thumbnail: thumbnail
       }
     })
   })
   .then(imgDls => {
     return imgDls.reduce((promise, imgdl) => {
-      return promise.then(result => downloadImageWithResult(imgdl));
+      return promise.then(result => {
+        return downloadImageWithResult(imgdl)
+          .then(result => {
+            if (result) {
+              console.log("Generating thumbnail for " + imgdl.identifier);
+              let thumbnail = imgdl.thumbnail;
+              let imageFile = imgdl.filename;
+              return util.genThumbnail(imageFile, thumbnail);
+            }
+            else {
+              return util.noop();
+            }
+          })
+      });
     }, Promise.resolve());
   })
   .then(() => {

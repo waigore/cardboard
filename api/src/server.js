@@ -17,7 +17,19 @@ app.use(function(req, res, next) {
 
 app.get('/api/images/find', (req, res) => {
   imgDlService.queueAllTags()
-  .then(tags => res.status(200).send({tags: tags}))
+  .then(result => res.status(200).send({status: result.status}))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+});
+
+app.get('/api/images/download', (req, res) => {
+  imgDlService.startImageDownload()
+  .then(identifiers => res.status(200).send({identifiers: identifiers}))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+});
+
+app.get('/api/thumbnails/create', (req, res) => {
+  imgDlService.startThumbnailGen()
+  .then(result => res.status(200).send({status: result.status}))
   .catch(error => {console.log(error); res.status(500).send(error)});
 });
 

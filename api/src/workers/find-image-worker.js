@@ -5,20 +5,13 @@ const booru = new Danbooru('waizer', '2yJ8XNHPkwNY4tIsHuye6U4xz6-KEvwOBfCbBz7N9d
 
 const Image = require('../sequelize/models').Image;
 const Op = require('sequelize').Op;
+const NoBooruPostsFoundError = require('../exceptions').NoBooruPostsFoundError;
 
 let findBooruImagesByTag = function(tags, limit=200) {
   return booru.requestJson('posts', {
     limit: limit,
     tags: tags,
   });
-}
-
-class NoPostsFoundError extends Error {
-  constructor(tag) {
-    super('No posts found for ' + tag + '!');
-    this.name = 'NoPostsFoundError';
-    this.tag = tag;
-  }
 }
 
 module.exports = function(input, done, progress) {
