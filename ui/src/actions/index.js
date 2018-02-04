@@ -16,6 +16,24 @@ export function searchTermsReceived(json) {
   }
 }
 
+export const FIND_IMAGES_BY_CRITERIA = 'FIND_IMAGES_BY_CRITERIA';
+export function findImagesByCriteria(tag, page) {
+  return {
+    type: FIND_IMAGES_BY_CRITERIA,
+    tag: tag,
+    page: page
+  }
+}
+
+export const IMAGES_RECEIVED = 'IMAGES_RECEIVED';
+export function imagesReceived(json) {
+  return {
+    type: IMAGES_RECEIVED,
+    data: json,
+    receivedAt: Date.now()
+  }
+}
+
 export function doGetAllSearchTerms() {
   return (dispatch) => {
     dispatch(getAllSearchTerms());
@@ -26,5 +44,25 @@ export function doGetAllSearchTerms() {
       .then(response => response.json())
       .then(json => dispatch(searchTermsReceived(json)))
       .catch(error => console.log('An error occurred.', error));
+  }
+}
+
+
+export function doFindImagesByCriteria(tag, page) {
+  return (dispatch) => {
+    dispatch(findImagesByCriteria(tag, page));
+
+    let apiUrl = `${API_ENDPOINT}/images/byCriteria`;
+    return fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({tag, page})
+    })
+    .then(response => response.json())
+    .then(json => dispatch(imagesReceived(json)))
+    .catch(error => console.log('An error occurred.', error));
   }
 }

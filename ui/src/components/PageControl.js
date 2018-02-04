@@ -5,13 +5,22 @@ class PageControl extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      from: 1,
-      to: 5,
+      from: props.from || 1,
+      to: props.to || 5,
       total: props.total || 10,
-      active: 1
+      active: props.activePage || 1
     }
 
     this.handlePaginationItemClick = this.handlePaginationItemClick.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      from: nextProps.from,
+      to: nextProps.to,
+      total: nextProps.total,
+      active: nextProps.active
+    })
   }
 
   recalculatePages(currPage) {

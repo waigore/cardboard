@@ -7,15 +7,25 @@ import AppActionBar from '../components/AppActionBar';
 import Album from '../components/Album';
 import PageControl from '../components/PageControl';
 
-import { doGetAllSearchTerms } from '../actions';
+import {
+  doGetAllSearchTerms,
+  doFindImagesByCriteria
+} from '../actions';
+
+const PAGE_SIZE = 30;
+const PAGE_WINDOW_SIZE = 5;
 
 class MainView extends Component {
   constructor(props) {
     super(props)
 
     this.state = {
-      numPages: 20,
       filterString: 'All',
+      filters: [],
+      page: 1,
+      pageFrom: 1,
+      pageTo: 1,
+      totalPages: 1,
       availableFilters: []
     }
 
@@ -24,12 +34,30 @@ class MainView extends Component {
   }
 
   componentWillMount() {
+    this.props.doFindImagesByCriteria("", this.state.page);
     this.props.doGetAllSearchTerms();
   }
 
   componentWillReceiveProps(nextProps) {
+    if (nextProps.images.receivedAt != this.props.images.receivedAt) {
+      let imageTotal = nextProps.images.total;
+      let numPages = Math.ceil(imageTotal/PAGE_SIZE);
+      //let currPage = 1;
+      let currPageFrom = 1;
+      let currPageTo = Math.min(currPageFrom+PAGE_WINDOW_SIZE-1, numPages);
+      console.log("currPageFrom: " + currPageFrom);
+      console.log("currPageTo: " + currPageTo);
+      console.log("numPages: " + numPages);
+
+      this.setState({
+        pageFrom: currPageFrom,
+        pageTo: currPageTo,
+        totalPages: numPages
+      })
+    }
+
     this.setState({
-      availableFilters: nextProps.mainViewState.terms.map(term => {
+      availableFilters: nextProps.terms.items.map(term => {
         return {
           value: term.name,
           label: term.name
@@ -38,18 +66,38 @@ class MainView extends Component {
     })
   }
 
+  findImages() {
+    let filters = this.state.filters;
+    filters.sort((f1, f2) => {
+      if (f1.value > f2.value) return 1;
+      else if (f1.value < f2.value) return -1;
+      return 0;
+    })
+    let searchTag = filters.map(filter => filter.value).join(' ');
+    console.log("Search tag: " + searchTag + " page: " + this.state.page);
+
+    this.props.doFindImagesByCriteria(searchTag, this.state.page);
+  }
+
   handlePageChanged(newPage) {
     console.log("Page changed: " + newPage);
+    this.setState({ page : newPage }, () => {
+      this.findImages();
+    });
   }
 
   handleSearchFilterChanged(filterValues) {
+    console.log("Filter changed: " + filterValues);
+    this.setState({filters: filterValues}, () => {
+      this.findImages();
+    });
+
     if (filterValues.length == 0)
     {
       this.setState({filterString: 'All'});
     }
     else {
       let filterString = filterValues.reduce((s, item) => s + ' ' + item.label, 'Tag: ');
-      console.log("Filter changed: " + filterString);
       this.setState({filterString: filterString});
     }
   }
@@ -64,11 +112,26 @@ class MainView extends Component {
         <Container fluid>
           <Row>
             <Col sm="12" md={{ size: 8, offset: 4 }}>
-              <PageControl total={this.state.numPages} onPageChanged={this.handlePageChanged}/>
+              <PageControl
+                from={this.state.pageFrom}
+                to={this.state.pageTo}
+                total={this.state.totalPages}
+                active={this.state.page}
+                onPageChanged={this.handlePageChanged}/>
             </Col>
           </Row>
           <Row noGutters={true}>
-            <Col xl="auto"><Album /></Col>
+            <Col xl="auto"><Album images={this.props.images.items}/></Col>
+          </Row>
+          <Row>
+            <Col sm="12" md={{ size: 8, offset: 4 }}>
+              <PageControl
+                from={this.state.pageFrom}
+                to={this.state.pageTo}
+                total={this.state.totalPages}
+                active={this.state.page}
+                onPageChanged={this.handlePageChanged}/>
+            </Col>
           </Row>
         </Container>
       </div>
@@ -79,13 +142,15 @@ class MainView extends Component {
 
 function mapStateToProps(state) {
   return {
-      mainViewState: state.mainViewState
+      images: state.images,
+      terms: state.terms,
   };
 }
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-      doGetAllSearchTerms
+      doGetAllSearchTerms,
+      doFindImagesByCriteria
     }, dispatch);
 }
 

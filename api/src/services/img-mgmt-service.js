@@ -8,8 +8,8 @@ let formatImage = function(image) {
   return {
     identifier: image.identifier,
     status: image.status,
-    thumbnail: 'http://localhost:5001/thumbnails/' + image.filename,
-    url: 'http://localhost:5001/' + image.filename,
+    thumbnail: 'thumbnails/' + image.filename,
+    url: image.filename,
     tags: image.tags.split(' ').splice(0, 3),
     characters: image.characters.split(' '),
     copyrights: image.copyrights.split(' '),
@@ -37,17 +37,21 @@ module.exports = {
   },
 
   findImagesForDisplay: function(tag, page, numPerPage=30) {
+    let searchTag = '%' + tag.replace(' ', '%') + '%';
     let offset = (page-1)*numPerPage;
     let whereCond = {
       status: 'DOWNLOADED',
       tags: {
-        [Op.like]: '%' + tag + '%'
+        [Op.like]: searchTag
       }
     }
     return Image.findAll({
       where: whereCond,
       offset: offset,
-      limit: numPerPage
+      limit: numPerPage,
+      order: [
+        ['identifier', 'DESC']
+      ]
     })
     .then(images => {
       return images.map(image => formatImage(image))
