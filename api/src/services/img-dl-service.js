@@ -8,7 +8,10 @@ const Pool = threads.Pool;
 const config  = threads.config;
 const spawn   = threads.spawn;
 
+const imgMgmtService = require('./img-mgmt-service');
+
 const IMG_LIMIT = 50;
+
 
 // Set base paths to thread scripts
 config.set({
@@ -18,14 +21,6 @@ config.set({
 });
 
 const pool = new Pool(4);
-
-let getAllSearchTerms = function() {
-  return SearchTerm.findAll({
-    where: {
-      status: 'ACTIVE'
-    }
-  });
-}
 
 let getSearchTermIdRange = function(term) {
   return Image.max('identifier', {
@@ -48,8 +43,7 @@ let formatTermToTag = function(searchTerm) {
 
 module.exports = {
   queueAllTags: function() {
-
-    return getAllSearchTerms()
+    return imgMgmtService.getAllSearchTerms()
     .then(terms => {
       return terms.map(term => {
         console.log('Mapping', term.name);

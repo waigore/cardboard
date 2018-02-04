@@ -23,6 +23,12 @@ class AppActionBar extends React.Component {
 
     this.state = {
       values: []
+      /*
+      [
+        {value: 'persona5', label: 'persona5'},
+        {value: 'persona4', label: 'persona4'}
+      ]
+      */
     };
 
     this.handleTagFilterSelectChanged = this.handleTagFilterSelectChanged.bind(this);
@@ -54,10 +60,7 @@ class AppActionBar extends React.Component {
             name="tag-filter"
             onChange={this.handleTagFilterSelectChanged}
             removeSelected={true}
-            options={[
-              {value: 'persona5', label: 'persona5'},
-              {value: 'persona4', label: 'persona4'}
-            ]}
+            options={this.props.availableFilters}
             value={this.state.values}
           />
         </div>

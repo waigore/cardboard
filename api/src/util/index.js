@@ -18,7 +18,8 @@ module.exports = {
     return sharp(imgFilename)
       .resize(318, 180)
       .crop(sharp.strategy.attention)
-      .toFile(outFilename);
+      .toFile(outFilename)
+      .catch(err => console.log('Error generating thumbnail! ' + err));
   },
 
   downloadImage: function(url, filename) {

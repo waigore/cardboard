@@ -1,9 +1,13 @@
 import React, { Component } from 'react';
 import { Col, Container, Row } from 'reactstrap';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 
 import AppActionBar from '../components/AppActionBar';
 import Album from '../components/Album';
 import PageControl from '../components/PageControl';
+
+import { doGetAllSearchTerms } from '../actions';
 
 class MainView extends Component {
   constructor(props) {
@@ -11,11 +15,27 @@ class MainView extends Component {
 
     this.state = {
       numPages: 20,
-      filterString: 'All'
+      filterString: 'All',
+      availableFilters: []
     }
 
     this.handlePageChanged = this.handlePageChanged.bind(this);
     this.handleSearchFilterChanged = this.handleSearchFilterChanged.bind(this);
+  }
+
+  componentWillMount() {
+    this.props.doGetAllSearchTerms();
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      availableFilters: nextProps.mainViewState.terms.map(term => {
+        return {
+          value: term.name,
+          label: term.name
+        }
+      })
+    })
   }
 
   handlePageChanged(newPage) {
@@ -37,7 +57,7 @@ class MainView extends Component {
   render() {
     return (
       <div>
-        <AppActionBar onSearchFilterChanged={this.handleSearchFilterChanged} />
+        <AppActionBar availableFilters={this.state.availableFilters} onSearchFilterChanged={this.handleSearchFilterChanged} />
         <div style={{ padding: '.5rem', margin: '0px' }}>
           <h3 style={{color: 'white'}}>{this.state.filterString}</h3>
         </div>
@@ -57,4 +77,16 @@ class MainView extends Component {
   }
 }
 
-export default MainView;
+function mapStateToProps(state) {
+  return {
+      mainViewState: state.mainViewState
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+      doGetAllSearchTerms
+    }, dispatch);
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(MainView);

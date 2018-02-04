@@ -6,6 +6,7 @@ const app = express();
 const port = process.env.PORT || 5001;
 
 const imgDlService = require('./services/img-dl-service');
+const imgMgmtService = require('./services/img-mgmt-service');
 const util = require('./util');
 
 app.use(bodyParser());
@@ -17,27 +18,30 @@ app.use(function(req, res, next) {
 });
 
 app.use(express.static(util.getOutputFolderPath()));
+app.use('/thumbnails', express.static(util.getThumbnailFolderPath()));
 
-app.get('/api/images/find', (req, res) => {
+app.get('/api/terms/all', (req, res) => {
+  imgMgmtService.getAllSearchTerms()
+  .then(terms => res.status(200).send({terms: terms}))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+})
+
+app.post('/api/images/byCriteria', (req, res) => {
+  imgMgmtService.findImagesForDisplay(req.body.tag, req.body.page)
+  .then(result => res.status(200).send(result))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+});
+
+app.get('/api/imagedl/find', (req, res) => {
   imgDlService.queueAllTags()
   .then(result => res.status(200).send({status: result.status}))
   .catch(error => {console.log(error); res.status(500).send(error)});
 });
 
-app.get('/api/images/download', (req, res) => {
+app.get('/api/imagedl/download', (req, res) => {
   imgDlService.startImageDownload()
   .then(identifiers => res.status(200).send({identifiers: identifiers}))
   .catch(error => {console.log(error); res.status(500).send(error)});
-});
-
-app.get('/api/thumbnails/create', (req, res) => {
-  imgDlService.startThumbnailGen()
-  .then(result => res.status(200).send({status: result.status}))
-  .catch(error => {console.log(error); res.status(500).send(error)});
-});
-
-app.get('/api/hello', (req, res) => {
-  res.send({ express: 'Hello From Express' });
 });
 
 const server = http.createServer(app);

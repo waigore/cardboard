@@ -1,18 +1,22 @@
 import {combineReducers} from 'redux';
 
-let _images = [
-  
-];
+import {
+  SEARCH_TERMS_RECEIVED
+} from '../actions';
 
-const images = function(state = {items: []}, action) {
+const mainViewState = function(state = {images: [], terms: []}, action) {
   switch (action.type) {
+    case SEARCH_TERMS_RECEIVED:
+      return Object.assign({}, state, {
+        terms: action.data.terms
+      });
     default:
-    return state;
+      return state;
   }
 }
 
 const appReducer = combineReducers({
-  images: images
+  mainViewState: mainViewState
 });
 
 export default appReducer;

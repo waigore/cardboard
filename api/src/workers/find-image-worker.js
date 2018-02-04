@@ -14,6 +14,11 @@ let findBooruImagesByTag = function(tags, limit=200) {
   });
 }
 
+let acceptedExt = function(filename) {
+  let exts = ['.png', 'jpg', 'jpeg'];
+  return exts.some(ext => filename.endsWith(ext));
+}
+
 module.exports = function(input, done, progress) {
   let tag = input.tag;
   let limit = input.limit;
@@ -26,7 +31,7 @@ module.exports = function(input, done, progress) {
       throw new NoPostsFoundError(tag);
     }
     return posts
-      .filter(post => post.md5 && post.file_url)
+      .filter(post => post.md5 && post.file_url && acceptedExt(post.file_url))
       .map(post => {
         return {
           identifier: `${post.id}`,
