@@ -142,7 +142,7 @@ class Album extends Component {
                 <Row key={'row' + (rowNum++)} style={{paddingBottom: "10px", paddingTop: "10px"}}>
                   {
                     imageRow.map(image =>
-                      <Col key={this.getChildKey(image)} md="4">
+                      <Col key={this.getChildKey(image)} md="4" xs="12">
                         <ImageEntry image={image} onDelete={this.handleDeleteImage}/>
                       </Col>
                     )

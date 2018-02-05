@@ -111,7 +111,7 @@ class MainView extends Component {
         </div>
         <Container fluid>
           <Row>
-            <Col sm="12" md={{ size: 8, offset: 4 }}>
+            <Col sm={{ size: 1, offset: 5 }}>
               <PageControl
                 from={this.state.pageFrom}
                 to={this.state.pageTo}
@@ -121,10 +121,10 @@ class MainView extends Component {
             </Col>
           </Row>
           <Row noGutters={true}>
-            <Col xl="auto"><Album images={this.props.images.items}/></Col>
+            <Col md="auto"><Album images={this.props.images.items}/></Col>
           </Row>
           <Row>
-            <Col sm="12" md={{ size: 8, offset: 4 }}>
+            <Col sm={{ size: 1, offset: 5 }}>
               <PageControl
                 from={this.state.pageFrom}
                 to={this.state.pageTo}
