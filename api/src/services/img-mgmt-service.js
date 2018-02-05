@@ -1,4 +1,5 @@
-const moment = require('moment')
+const fs = require('fs-extra');
+const moment = require('moment');
 
 const Image = require('../sequelize/models').Image;
 const SearchTerm = require('../sequelize/models').SearchTerm;
@@ -61,5 +62,34 @@ module.exports = {
         where: whereCond
       }).then(c => { return {total: c, images: displayImages}})
     })
+  },
+
+  deleteImage: function(identifier) {
+    return Image.findOne({
+      where: {
+        identifier: identifier
+      }
+    })
+    .then(image => {
+      return Image.update(
+        { status: 'DELETED' },
+        { where: {
+            identifier: identifier
+          }
+        }
+      ).then(affectedRows => image);
+    })
+    /*
+    .then(image => {
+      let fullImagePath = util.getOutputFolderPath() + '/' + image.filename;
+      let fullThumbnailPath = util.getThumbnailFolderPath() + '/' + image.filename;
+      return
+        fs.unlink(fullImagePath)
+        .then(() => fs.unlink(fullThumbnailPath))
+        .catch(err => console.log("Error deleting file on disk!", err));
+    })*/
+    .then(() => {
+      return {identifier: identifier, status: 'OK'}
+    });
   }
 }

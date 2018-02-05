@@ -11,8 +11,14 @@ import {
   Col,
   Container,
   Row } from 'reactstrap';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import FaTrash from 'react-icons/lib/fa/trash';
 import moment from 'moment';
+
+import {
+  doDeleteImage
+} from '../actions';
 
 import { range } from '../util';
 import './Album.css';
@@ -40,6 +46,12 @@ class ImageTags extends Component {
 }
 
 class ImageEntry extends Component {
+  constructor(props) {
+    super(props);
+
+    this.handleDeleteIconClick = this.handleDeleteIconClick.bind(this);
+  }
+
   render() {
     if (!this.props.image) {
       return <div></div>
@@ -54,12 +66,18 @@ class ImageEntry extends Component {
         <CardBody>
           <ImageTags tags={this.props.image.tags} />
           <div className="d-flex justify-content-between align-items-center">
-            <FaTrash style={{cursor: 'pointer'}}/>
+            <FaTrash style={{cursor: 'pointer'}} onClick={evt => this.handleDeleteIconClick(evt, this.props.image.identifier)}/>
             <small className="text-muted">{moment(this.props.image.uploadedAt).fromNow()}</small>
           </div>
         </CardBody>
       </Card>
     );
+  }
+
+  handleDeleteIconClick(evt, identifier) {
+    if (this.props.onDelete) {
+      this.props.onDelete(identifier);
+    }
   }
 }
 
@@ -71,12 +89,18 @@ class Album extends Component {
     this.state = {
       imageRows: props.images ? this.splitEntriesByRows(props.images) : []
     }
+
+    this.handleDeleteImage = this.handleDeleteImage.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
     this.setState({
       imageRows: this.splitEntriesByRows(nextProps.images)
     })
+  }
+
+  handleDeleteImage(identifier) {
+    this.props.doDeleteImage(identifier);
   }
 
   splitEntriesByRows(images) {
@@ -119,7 +143,7 @@ class Album extends Component {
                   {
                     imageRow.map(image =>
                       <Col key={this.getChildKey(image)} md="4">
-                        <ImageEntry image={image} />
+                        <ImageEntry image={image} onDelete={this.handleDeleteImage}/>
                       </Col>
                     )
                   }
@@ -132,4 +156,10 @@ class Album extends Component {
   }
 }
 
-export default Album;
+function mapDispatchToProps(dispatch) {
+    return bindActionCreators({
+      doDeleteImage
+    }, dispatch);
+}
+
+export default connect(null, mapDispatchToProps)(Album);

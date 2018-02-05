@@ -34,6 +34,23 @@ export function imagesReceived(json) {
   }
 }
 
+export const DELETE_IMAGE = 'DELETE_IMAGE';
+export function deleteImage(identifier) {
+  return {
+    type: DELETE_IMAGE,
+    identifier: identifier
+  }
+}
+
+export const IMAGE_DELETED = 'IMAGE_DELETED';
+export function imageDeleted(json) {
+  return {
+    type: IMAGE_DELETED,
+    data: json,
+    receivedAt: Date.now()
+  }
+}
+
 export function doGetAllSearchTerms() {
   return (dispatch) => {
     dispatch(getAllSearchTerms());
@@ -63,6 +80,25 @@ export function doFindImagesByCriteria(tag, page) {
     })
     .then(response => response.json())
     .then(json => dispatch(imagesReceived(json)))
+    .catch(error => console.log('An error occurred.', error));
+  }
+}
+
+export function doDeleteImage(identifier) {
+  return (dispatch) => {
+    dispatch(deleteImage(identifier));
+
+    let apiUrl = `${API_ENDPOINT}/images/delete`;
+    return fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({identifier})
+    })
+    .then(response => response.json())
+    .then(json => dispatch(imageDeleted(json)))
     .catch(error => console.log('An error occurred.', error));
   }
 }

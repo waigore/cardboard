@@ -32,6 +32,12 @@ app.post('/api/images/byCriteria', (req, res) => {
   .catch(error => {console.log(error); res.status(500).send(error)});
 });
 
+app.post('/api/images/delete', (req, res) => {
+  imgMgmtService.deleteImage(req.body.identifier)
+  .then(result => res.status(200).send(result))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+})
+
 app.get('/api/imagedl/find', (req, res) => {
   imgDlService.queueAllTags()
   .then(result => res.status(200).send({status: result.status}))

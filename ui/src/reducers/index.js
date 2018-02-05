@@ -2,6 +2,7 @@ import {combineReducers} from 'redux';
 
 import {
   IMAGES_RECEIVED,
+  IMAGE_DELETED,
   SEARCH_TERMS_RECEIVED
 } from '../actions';
 
@@ -34,6 +35,11 @@ const images = function(state = {items: [], total: -1, receivedAt: null}, action
       return Object.assign({}, state, {
         items: processImages(action.data.images),
         total: action.data.total,
+        receivedAt: action.receivedAt
+      });
+    case IMAGE_DELETED:
+      return Object.assign({}, state, {
+        items: state.items.filter(image => image.identifier != action.data.identifier),
         receivedAt: action.receivedAt
       });
     default:
