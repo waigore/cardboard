@@ -10,7 +10,7 @@ const SERVER_ENDPOINT = 'http://localhost:5001';
 
 let processImages = function(images) {
   let newArr = images.map(image => {
-    console.log(image.thumbnail);
+    image.fullUrl = `${SERVER_ENDPOINT}/${image.filename}`;
     image.fullThumbnailUrl = `${SERVER_ENDPOINT}/${image.thumbnail}`;
     return image;
   })

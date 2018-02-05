@@ -7,6 +7,10 @@ const Image = require('../sequelize/models').Image;
 const Op = require('sequelize').Op;
 const NoBooruPostsFoundError = require('../exceptions').NoBooruPostsFoundError;
 
+const logging = require('../util/logging');
+
+const logger = logging.getLogger('image-search', 'imagesearch');
+
 let findBooruImagesByTag = function(tags, limit=200) {
   return booru.requestJson('posts', {
     limit: limit,
@@ -22,11 +26,11 @@ let acceptedExt = function(filename) {
 module.exports = function(input, done, progress) {
   let tag = input.tag;
   let limit = input.limit;
-  console.log('Tag to find images for:' + tag + ' limit:' + limit);
+  logger.info('Finding images for tag: ' + tag + ', limit: ' + limit);
 
   findBooruImagesByTag(tag, limit)
   .then(posts => {
-    console.log(posts.length + ' posts retrieved.');
+    logger.info(posts.length + ' posts retrieved.');
     if (posts.length == 0) {
       throw new NoPostsFoundError(tag);
     }
@@ -61,17 +65,19 @@ module.exports = function(input, done, progress) {
     .then(identifiers => preRecs.filter(r => !identifiers.includes(r.identifier)))
   })
   .then(recs => {
-    console.log("Bulk creating " + recs.length + " recs");
+    logger.info("Bulk creating " + recs.length + " recs");
     return Image.bulkCreate(recs).then(() => recs);
   })
   .then(insertedRecs => {
+    logger.info('Image search done.')
     done({identifiers: insertedRecs.map(rec => rec.identifier)});
   })
   .catch(NoPostsFoundError, (e) => {
+    logger.info('No images found!');
     done({identifiers: []})
   })
   .catch(err => {
-    console.log('Error!', err);
+    logger.warn('Error finding images!', err);
     done({error: err})
   })
 }

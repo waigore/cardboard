@@ -31,9 +31,52 @@ class ImageTags extends Component {
   }
 
   renderTags() {
-    return this.props.tags.map(tag => {
-      return <div key={'tag_' + tag} className="image-tag">{tag}</div>
+    let tags = [];
+    if (this.props.characters) {
+      tags = tags.concat(this.props.characters.map(tag => {
+        return {
+          tag: tag,
+          type: 'character'
+        }
+      }));
+    }
+    if (this.props.general) {
+      tags = tags.concat(this.props.general.map(tag => {
+        return {
+          tag: tag,
+          type: 'general'
+        }
+      }));
+    }
+
+
+    return tags.map(tag => {
+      if (tag.type == 'character')
+        return <div key={'tag_' + tag.tag} className="image-tag image-tag-character">{tag.tag}</div>;
+      else
+        return <div key={'tag_' + tag.tag} className="image-tag">{tag.tag}</div>;
     })
+
+
+    /*
+    if (this.props.characters) {
+      return this.props.characters.map(tag => {
+        return <div key={'tag_' + tag} className="image-tag image-tag-character">{tag}</div>
+      })
+    }
+    else {
+      return this.props.general.map(tag => {
+        return <div key={'tag_' + tag} className="image-tag">{tag}</div>
+      })
+    }
+    */
+
+    /*
+    return tags.map(tag => {
+      return <div key={'tag_' + tag} className="image-tag image-tag-character">{tag}</div>
+    })*/
+
+
   }
 
   render() {
@@ -59,12 +102,17 @@ class ImageEntry extends Component {
 
     return (
       <Card className="box-shadow">
-        <CardImg top
-          width="100%"
-          src={this.props.image.fullThumbnailUrl}
-          alt={this.props.image.identifier} />
+        <a href={this.props.image.fullUrl} target="_blank">
+          <CardImg top className="image-thumbnail"
+            width="100%"
+            src={this.props.image.fullThumbnailUrl}
+            alt={this.props.image.identifier} />
+        </a>
         <CardBody>
-          <ImageTags tags={this.props.image.tags} />
+          <ImageTags
+            general={this.props.image.tags}
+            characters={this.props.image.characters}
+            copyrights={this.props.image.copyrights} />
           <div className="d-flex justify-content-between align-items-center">
             <FaTrash style={{cursor: 'pointer'}} onClick={evt => this.handleDeleteIconClick(evt, this.props.image.identifier)}/>
             <small className="text-muted">{moment(this.props.image.uploadedAt).fromNow()}</small>

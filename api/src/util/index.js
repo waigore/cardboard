@@ -3,6 +3,10 @@ const moment = require('moment');
 const sharp = require('sharp');
 const request = require('request-promise');
 
+const logging = require('./logging');
+
+const logger = logging.getRootLogger('util');
+
 module.exports = {
   getOutputFolderPath: function() {
     let path = 'D:/Cardboard';
@@ -19,7 +23,11 @@ module.exports = {
       .resize(318, 180)
       .crop(sharp.strategy.attention)
       .toFile(outFilename)
-      .catch(err => console.log('Error generating thumbnail! ' + err));
+      .then(() => true)
+      .catch(err => {
+        logger.warn('Error generating thumbnail for image ' + imgFilename + '!', err);
+        return false;
+      });
   },
 
   downloadImage: function(url, filename) {
@@ -27,10 +35,10 @@ module.exports = {
       .then((body) => {
         return fs.writeFile(filename, body, "binary");
       })
-      .then(() => console.log('Done downloading ' + filename + '!'))
+      .then(() => true)
       .catch(err => {
-        console.log("Error! " + err);
-        throw err;
+        logger.warn("Error downloading image!", err);
+        return false;
       });
   },
 
