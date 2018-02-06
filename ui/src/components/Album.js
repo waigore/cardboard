@@ -25,6 +25,9 @@ import './Album.css';
 
 const NUM_COLS = 3;
 
+export const THUMBNAIL_MODE_LARGE = 'large';
+export const THUMBNAIL_MODE_SMALL = 'small';
+
 class ImageTags extends Component {
   constructor(props) {
     super(props);
@@ -134,16 +137,23 @@ class Album extends Component {
   constructor(props) {
     super(props);
 
+    let cols = props.thumbnailMode == THUMBNAIL_MODE_LARGE ? 3 : 6;
+
     this.state = {
-      imageRows: props.images ? this.splitEntriesByRows(props.images) : []
+      cols: cols,
+      imageRows: props.images ? this.splitEntriesByRows(props.images, cols) : []
     }
 
     this.handleDeleteImage = this.handleDeleteImage.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
+    let thumbnailMode = nextProps.thumbnailMode || THUMBNAIL_MODE_LARGE;
+    let cols = thumbnailMode == THUMBNAIL_MODE_LARGE ? 3 : 6;
+
     this.setState({
-      imageRows: this.splitEntriesByRows(nextProps.images)
+      cols: cols,
+      imageRows: this.splitEntriesByRows(nextProps.images, cols)
     })
   }
 
@@ -151,15 +161,15 @@ class Album extends Component {
     this.props.doDeleteImage(identifier);
   }
 
-  splitEntriesByRows(images) {
+  splitEntriesByRows(images, colsPerRow) {
     let myImages = images.map(image => image);
     let imageRows = [];
     while (myImages.length > 0) {
-      if (myImages.length >= 3) {
-          imageRows.push(myImages.splice(0, NUM_COLS));
+      if (myImages.length >= colsPerRow) {
+          imageRows.push(myImages.splice(0, colsPerRow));
       }
       else {
-        while (myImages.length < 3) {
+        while (myImages.length < colsPerRow) {
           myImages.push(null);
         }
         imageRows.push(myImages);
@@ -190,7 +200,10 @@ class Album extends Component {
                 <Row key={'row' + (rowNum++)} style={{paddingBottom: "10px", paddingTop: "10px"}}>
                   {
                     imageRow.map(image =>
-                      <Col key={this.getChildKey(image)} md="4" xs="12">
+                      <Col
+                        key={this.getChildKey(image)}
+                        md={this.props.thumbnailMode == THUMBNAIL_MODE_LARGE ? 4 : 2 }
+                        xs="12">
                         <ImageEntry image={image} onDelete={this.handleDeleteImage}/>
                       </Col>
                     )

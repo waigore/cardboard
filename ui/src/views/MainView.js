@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import AppActionBar from '../components/AppActionBar';
-import Album from '../components/Album';
+import Album, { THUMBNAIL_MODE_LARGE, THUMBNAIL_MODE_SMALL } from '../components/Album';
 import PageControl from '../components/PageControl';
 
 import {
@@ -26,11 +26,13 @@ class MainView extends Component {
       pageFrom: 1,
       pageTo: 1,
       totalPages: 1,
+      thumbnailMode: THUMBNAIL_MODE_LARGE,
       availableFilters: []
     }
 
     this.handlePageChanged = this.handlePageChanged.bind(this);
     this.handleSearchFilterChanged = this.handleSearchFilterChanged.bind(this);
+    this.handleThumbnailModeToggled = this.handleThumbnailModeToggled.bind(this);
   }
 
   componentWillMount() {
@@ -102,10 +104,19 @@ class MainView extends Component {
     }
   }
 
+  handleThumbnailModeToggled(toggleMode) {
+    this.setState({
+      thumbnailMode : toggleMode
+    });
+  }
+
   render() {
     return (
       <div>
-        <AppActionBar availableFilters={this.state.availableFilters} onSearchFilterChanged={this.handleSearchFilterChanged} />
+        <AppActionBar
+          availableFilters={this.state.availableFilters}
+          onSearchFilterChanged={this.handleSearchFilterChanged}
+          onThumbnailModeToggled={this.handleThumbnailModeToggled} />
         <div style={{ padding: '.5rem', margin: '0px' }}>
           <h3 style={{color: 'white'}}>{this.state.filterString}</h3>
         </div>
@@ -121,7 +132,7 @@ class MainView extends Component {
             </Col>
           </Row>
           <Row noGutters={true}>
-            <Col md="auto"><Album images={this.props.images.items}/></Col>
+            <Col md="auto"><Album images={this.props.images.items} thumbnailMode={this.state.thumbnailMode}/></Col>
           </Row>
           <Row>
             <Col sm={{ size: 1, offset: 5 }}>

@@ -11,6 +11,7 @@ import {Link} from 'react-router-dom';
 
 import FaList from 'react-icons/lib/fa/list';
 import FaThLarge from 'react-icons/lib/fa/th-large';
+import FaTh from 'react-icons/lib/fa/th';
 import FaEdit from 'react-icons/lib/fa/edit';
 
 import 'react-select/dist/react-select.css';
@@ -32,6 +33,8 @@ class AppActionBar extends React.Component {
     };
 
     this.handleTagFilterSelectChanged = this.handleTagFilterSelectChanged.bind(this);
+    this.handleLargeThumbnailButtonClick = this.handleLargeThumbnailButtonClick.bind(this);
+    this.handleSmallThumbnailButtonClick = this.handleSmallThumbnailButtonClick.bind(this);
   }
 
   handleTagFilterSelectChanged(values) {
@@ -42,12 +45,32 @@ class AppActionBar extends React.Component {
     }
   }
 
+  handleLargeThumbnailButtonClick(evt) {
+    if (this.props.onThumbnailModeToggled) {
+      this.props.onThumbnailModeToggled('large');
+    }
+  }
+
+  handleSmallThumbnailButtonClick(evt) {
+    if (this.props.onThumbnailModeToggled) {
+      this.props.onThumbnailModeToggled('small');
+    }
+  }
+
   render() {
     return (
       <div className="clearfix" style={{ padding: '.5rem', margin: '0px' }}>
         <ButtonGroup className="float-left" style={{marginRight: "20px"}}>
-          <Button outline color="success" style={{ color : 'white', borderColor: 'white' }}><FaList /></Button>
-          <Button outline color="success" style={{ color : 'white', borderColor: 'white' }}><FaThLarge /></Button>
+          <Button outline color="success"
+            style={{ color : 'white', borderColor: 'white' }}
+            onClick={evt => this.handleLargeThumbnailButtonClick(evt)}>
+              <FaThLarge />
+          </Button>
+          <Button outline color="success"
+            style={{ color : 'white', borderColor: 'white' }}
+            onClick={evt => this.handleSmallThumbnailButtonClick(evt)}>
+              <FaTh />
+          </Button>
         </ButtonGroup>
 
         <ButtonGroup className="float-left">
