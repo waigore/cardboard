@@ -3,13 +3,14 @@ const moment = require('moment');
 const sharp = require('sharp');
 const request = require('request-promise');
 
+const config = require('../config');
 const logging = require('./logging');
 
 const logger = logging.getRootLogger('util');
 
 module.exports = {
   getOutputFolderPath: function() {
-    let path = 'D:/Cardboard';
+    let path = config.outputPath;
     return path;
   },
 
