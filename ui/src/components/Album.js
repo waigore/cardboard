@@ -14,6 +14,8 @@ import {
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import FaTrash from 'react-icons/lib/fa/trash';
+import { shake } from 'react-animations';
+import Radium, { StyleRoot } from 'radium';
 import moment from 'moment';
 
 import {
@@ -27,6 +29,13 @@ const NUM_COLS = 3;
 
 export const THUMBNAIL_MODE_LARGE = 'large';
 export const THUMBNAIL_MODE_SMALL = 'small';
+
+const styles = {
+  infiniteShake: {
+    animation: 'infinite',
+    animationName: Radium.keyframes(shake, 'shake')
+  }
+}
 
 class ImageTags extends Component {
   constructor(props) {
@@ -95,7 +104,35 @@ class ImageEntry extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      cardClassName: "image-entry"
+    }
+
     this.handleDeleteIconClick = this.handleDeleteIconClick.bind(this);
+    this.handleMouseEnter = this.handleMouseEnter.bind(this);
+    this.handleMouseLeave = this.handleMouseLeave.bind(this);
+  }
+
+  handleDeleteIconClick(evt, identifier) {
+    if (this.props.onDelete) {
+      this.props.onDelete(identifier);
+    }
+  }
+
+  handleMouseEnter(evt) {
+    if (this.props.selectable) {
+      this.setState({
+        cardClassName: "image-entry image-entry-hover"
+      })
+    }
+  }
+
+  handleMouseLeave(evt) {
+    if (this.props.selectable) {
+      this.setState({
+        cardClassName: "image-entry"
+      })
+    }
   }
 
   render() {
@@ -104,7 +141,7 @@ class ImageEntry extends Component {
     }
 
     return (
-      <Card className="box-shadow">
+      <Card className={"" + this.state.cardClassName} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
         <a href={this.props.image.fullUrl} target="_blank">
           <CardImg top className="image-thumbnail"
             width="100%"
@@ -124,16 +161,9 @@ class ImageEntry extends Component {
       </Card>
     );
   }
-
-  handleDeleteIconClick(evt, identifier) {
-    if (this.props.onDelete) {
-      this.props.onDelete(identifier);
-    }
-  }
 }
 
 class Album extends Component {
-
   constructor(props) {
     super(props);
 
@@ -204,7 +234,7 @@ class Album extends Component {
                         key={this.getChildKey(image)}
                         md={this.props.thumbnailMode == THUMBNAIL_MODE_LARGE ? 4 : 2 }
                         xs="12">
-                        <ImageEntry image={image} onDelete={this.handleDeleteImage}/>
+                        <ImageEntry selectable={true} image={image} onDelete={this.handleDeleteImage}/>
                       </Col>
                     )
                   }
