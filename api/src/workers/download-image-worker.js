@@ -6,16 +6,19 @@ const Image = require('../sequelize/models').Image;
 const Op = require('sequelize').Op;
 
 const util = require('../util');
+const logging = require('../util/logging');
 
+const logger = logging.getLogger('image-dl', 'imagedl');
 
 let downloadImageWithResult = function(imgDl) {
   let millis = Math.random()*1000;
   return myMSleep(millis)
     .then((_) => {
-      console.log('slept ' + millis + 'ms, downloading ' + imgDl.identifier);
+      logger.info('Downloading ' + imgDl.identifier + '...');
       return util.downloadImage(imgDl.url, imgDl.filename);
     })
     .then(() => {
+      logger.info(imgDl.identifier + ' done!');
       return Image.update(
         {status: 'DOWNLOADED', downloadedAt: moment()},
         { where: {
@@ -46,6 +49,7 @@ let myMSleep = function(millis) {
 module.exports = function(input, done, progress) {
   let identifiers = input.identifiers;
 
+
   Image.update(
     { status: 'DOWNLOADING' },
     {
@@ -66,6 +70,7 @@ module.exports = function(input, done, progress) {
     })
   })
   .then(imgs => {
+    logger.info("Downloading " + imgs.length + " images.")
     return imgs.map(img => {
       let url = `https://danbooru.donmai.us${img.fileUrl}`;
       let outputPath = util.getOutputFolderPath();
@@ -86,7 +91,6 @@ module.exports = function(input, done, progress) {
         return downloadImageWithResult(imgdl)
           .then(result => {
             if (result) {
-              console.log("Generating thumbnail for " + imgdl.identifier);
               let thumbnail = imgdl.thumbnail;
               let imageFile = imgdl.filename;
               return util.genThumbnail(imageFile, thumbnail);
@@ -99,11 +103,11 @@ module.exports = function(input, done, progress) {
     }, Promise.resolve());
   })
   .then(() => {
-    console.log("download-image-worker DONE!!");
+    logger.info("Image download done.");
     done({identifiers: identifiers});
   })
   .catch(err => {
-    console.log("Error!" + err);
+    logger.warn("Error downloading images!", err);
     done({error: err})
   })
 

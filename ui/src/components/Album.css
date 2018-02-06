@@ -19,3 +19,17 @@
   max-height: 20px;
   cursor: pointer;
 }
+
+.image-tag-character {
+  color: #eee;
+  background-color: mediumseagreen;
+  border: 1px solid white;
+}
+
+.image-thumbnail {
+  filter: blur(8px);
+}
+
+.image-thumbnail:hover {
+  filter: none;
+}

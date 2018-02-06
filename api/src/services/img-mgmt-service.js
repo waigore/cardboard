@@ -10,10 +10,10 @@ let formatImage = function(image) {
     identifier: image.identifier,
     status: image.status,
     thumbnail: 'thumbnails/' + image.filename,
-    url: image.filename,
+    filename: image.filename,
     tags: image.tags.split(' ').splice(0, 3),
-    characters: image.characters.split(' '),
-    copyrights: image.copyrights.split(' '),
+    characters: image.characters && image.characters.trim() ? image.characters.split(' ') : [],
+    copyrights: image.copyrights && image.copyrights.trim() ? image.copyrights.split(' ') : [],
     uploadedAt: moment(image.uploadedAt)
   }
 }
