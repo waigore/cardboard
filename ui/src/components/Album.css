@@ -6,6 +6,10 @@
   box-shadow: 5px 5px 7px 1px rgba(0,0,0,0.75);
 }
 
+.image-entry-selected {
+  background-color: #999;
+}
+
 .image-tag-container {
   display: flex;
   flex: 1;

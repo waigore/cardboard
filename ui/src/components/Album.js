@@ -105,12 +105,31 @@ class ImageEntry extends Component {
     super(props);
 
     this.state = {
-      cardClassName: "image-entry"
+      selected: false,
+      hover: false
     }
 
     this.handleDeleteIconClick = this.handleDeleteIconClick.bind(this);
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      selected: nextProps.selected
+    })
+  }
+
+  getCardClassName() {
+    let className = "image-entry";
+    if (this.props.selectable && this.state.hover) {
+      className += " image-entry-hover";
+    }
+    if (this.state.selected) {
+      className += " image-entry-selected";
+    }
+    return className;
   }
 
   handleDeleteIconClick(evt, identifier) {
@@ -120,18 +139,20 @@ class ImageEntry extends Component {
   }
 
   handleMouseEnter(evt) {
-    if (this.props.selectable) {
-      this.setState({
-        cardClassName: "image-entry image-entry-hover"
-      })
-    }
+    this.setState({
+      hover: true
+    })
   }
 
   handleMouseLeave(evt) {
-    if (this.props.selectable) {
-      this.setState({
-        cardClassName: "image-entry"
-      })
+    this.setState({
+      hover: false
+    })
+  }
+
+  handleClick(evt, identifier) {
+    if (this.props.onSelect) {
+      this.props.onSelect(identifier);
     }
   }
 
@@ -141,7 +162,10 @@ class ImageEntry extends Component {
     }
 
     return (
-      <Card className={"" + this.state.cardClassName} onMouseEnter={this.handleMouseEnter} onMouseLeave={this.handleMouseLeave}>
+      <Card className={"" + this.getCardClassName()}
+          onMouseEnter={this.handleMouseEnter}
+          onMouseLeave={this.handleMouseLeave}
+          onClick={evt => this.handleClick(evt, this.props.image.identifier)}>
         <a href={this.props.image.fullUrl} target="_blank">
           <CardImg top className="image-thumbnail"
             width="100%"
@@ -171,10 +195,14 @@ class Album extends Component {
 
     this.state = {
       cols: cols,
-      imageRows: props.images ? this.splitEntriesByRows(props.images, cols) : []
+      imageRows: props.images ? this.splitEntriesByRows(props.images, cols) : [],
+      selectedImages: [],
+      refreshedAt: moment()
     }
 
     this.handleDeleteImage = this.handleDeleteImage.bind(this);
+    this.handleImageEntrySelect = this.handleImageEntrySelect.bind(this);
+    this.isImageEntrySelected = this.isImageEntrySelected.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -189,6 +217,34 @@ class Album extends Component {
 
   handleDeleteImage(identifier) {
     this.props.doDeleteImage(identifier);
+  }
+
+  handleImageEntrySelect(image) {
+    this.toggleImageEntrySelection(image);
+  }
+
+  toggleImageEntrySelection(image) {
+    let selectedImages = this.state.selectedImages.map(i => i), newSelectedImages;
+    let selectedImageIdentifiers = selectedImages.map(i => i.identifier);
+    if (!selectedImageIdentifiers.includes(image.identifier))
+    {
+      selectedImages.push(image);
+      newSelectedImages = selectedImages;
+    }
+    else {
+      newSelectedImages = selectedImages.filter(i => i.identifier != image.identifier);
+    }
+
+    this.setState({
+      selectedImages: newSelectedImages,
+      refreshedAt: moment()
+    })
+  }
+
+  isImageEntrySelected(image) {
+    let identifiers = this.state.selectedImages.map(i => i.identifier);
+    console.log('Selected: ' + identifiers);
+    return identifiers.includes(image.identifier);
   }
 
   splitEntriesByRows(images, colsPerRow) {
@@ -234,7 +290,12 @@ class Album extends Component {
                         key={this.getChildKey(image)}
                         md={this.props.thumbnailMode == THUMBNAIL_MODE_LARGE ? 4 : 2 }
                         xs="12">
-                        <ImageEntry selectable={true} image={image} onDelete={this.handleDeleteImage}/>
+                        <ImageEntry
+                          selectable={true}
+                          selected={this.isImageEntrySelected(image)}
+                          image={image}
+                          onDelete={this.handleDeleteImage}
+                          onSelect={ identifier => this.handleImageEntrySelect(image)}/>
                       </Col>
                     )
                   }
