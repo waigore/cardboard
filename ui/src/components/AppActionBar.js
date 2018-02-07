@@ -14,7 +14,12 @@ import FaThLarge from 'react-icons/lib/fa/th-large';
 import FaTh from 'react-icons/lib/fa/th';
 import FaEdit from 'react-icons/lib/fa/edit';
 
-import {THUMBNAIL_MODE_LARGE, THUMBNAIL_MODE_SMALL} from '../views/MainView';
+import {
+  THUMBNAIL_MODE_LARGE,
+  THUMBNAIL_MODE_SMALL,
+  EDIT_MODE_EDIT,
+  EDIT_MODE_VIEW
+} from '../views/MainView';
 
 import 'react-select/dist/react-select.css';
 import './AppActionBar.css';
@@ -37,6 +42,7 @@ class AppActionBar extends React.Component {
     this.handleTagFilterSelectChanged = this.handleTagFilterSelectChanged.bind(this);
     this.handleLargeThumbnailButtonClick = this.handleLargeThumbnailButtonClick.bind(this);
     this.handleSmallThumbnailButtonClick = this.handleSmallThumbnailButtonClick.bind(this);
+    this.handleEditButtonClick = this.handleEditButtonClick.bind(this);
   }
 
   handleTagFilterSelectChanged(values) {
@@ -44,6 +50,12 @@ class AppActionBar extends React.Component {
 
     if (this.props.onSearchFilterChanged) {
       this.props.onSearchFilterChanged(values);
+    }
+  }
+
+  handleEditButtonClick(evt) {
+    if (this.props.onEditModeToggled) {
+      this.props.onEditModeToggled(this.props.editMode == EDIT_MODE_EDIT ? EDIT_MODE_VIEW : EDIT_MODE_EDIT);
     }
   }
 
@@ -63,12 +75,14 @@ class AppActionBar extends React.Component {
     return (
       <div className="clearfix" style={{ padding: '.5rem', margin: '0px' }}>
         <ButtonGroup className="float-left" style={{marginRight: "20px"}}>
-          <Button outline={this.props.thumbnailMode != THUMBNAIL_MODE_LARGE} color="success"
+          <Button outline={this.props.thumbnailMode != THUMBNAIL_MODE_LARGE}
+            color="success"
             style={{ color : 'white', borderColor: 'white' }}
             onClick={evt => this.handleLargeThumbnailButtonClick(evt)}>
               <FaThLarge />
           </Button>
-          <Button outline={this.props.thumbnailMode != THUMBNAIL_MODE_SMALL} color="success"
+          <Button outline={this.props.thumbnailMode != THUMBNAIL_MODE_SMALL}
+            color="success"
             style={{ color : 'white', borderColor: 'white' }}
             onClick={evt => this.handleSmallThumbnailButtonClick(evt)}>
               <FaTh />
@@ -76,7 +90,12 @@ class AppActionBar extends React.Component {
         </ButtonGroup>
 
         <ButtonGroup className="float-left">
-          <Button outline color="success" style={{ color : 'white', borderColor: 'white' }}><FaEdit /></Button>
+          <Button outline={this.props.editMode != EDIT_MODE_EDIT}
+            color="success"
+            style={{ color : 'white', borderColor: 'white' }}
+            onClick={evt => this.handleEditButtonClick(evt)}>
+              <FaEdit />
+          </Button>
         </ButtonGroup>
         <div className="float-right">
           <Select

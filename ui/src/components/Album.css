@@ -1,7 +1,16 @@
 @keyframes border-pulsate {
     0%   { border-color: rgba(0, 255, 255, 1); }
-    50%  { border-color: rgba(0, 255, 255, 0); }
+    50%  { border-color: rgba(0, 128, 255, 1); }
     100% { border-color: rgba(0, 255, 255, 1); }
+}
+
+@keyframes jiggle {
+    0% {
+        transform: rotate(-1deg);
+        }
+    50% {
+        transform: rotate(1deg);
+    }
 }
 
 .image-entry {
@@ -11,6 +20,11 @@
 
 .image-entry-hover {
   box-shadow: 5px 5px 7px 1px rgba(0,0,0,0.75);
+}
+
+.image-entry-selectable {
+  animation: jiggle 0.2s infinite;
+  transform: rotate(-3deg);
 }
 
 .image-entry-selected {

@@ -17,6 +17,8 @@ const PAGE_WINDOW_SIZE = 5;
 
 export const THUMBNAIL_MODE_LARGE = 'large';
 export const THUMBNAIL_MODE_SMALL = 'small';
+export const EDIT_MODE_EDIT = 'edit';
+export const EDIT_MODE_VIEW = 'view';
 
 class MainView extends Component {
   constructor(props) {
@@ -30,12 +32,14 @@ class MainView extends Component {
       pageFrom: 1,
       pageTo: 1,
       totalPages: 1,
-      thumbnailMode: THUMBNAIL_MODE_LARGE
+      thumbnailMode: THUMBNAIL_MODE_LARGE,
+      editMode: EDIT_MODE_VIEW
     }
 
     this.handlePageChanged = this.handlePageChanged.bind(this);
     this.handleSearchFilterChanged = this.handleSearchFilterChanged.bind(this);
     this.handleThumbnailModeToggled = this.handleThumbnailModeToggled.bind(this);
+    this.handleEditModeToggled = this.handleEditModeToggled.bind(this);
   }
 
   componentWillMount() {
@@ -107,6 +111,12 @@ class MainView extends Component {
     }
   }
 
+  handleEditModeToggled(toggleMode) {
+    this.setState({
+      editMode: toggleMode
+    })
+  }
+
   handleThumbnailModeToggled(toggleMode) {
     this.setState({
       thumbnailMode : toggleMode
@@ -120,7 +130,9 @@ class MainView extends Component {
           availableFilters={this.state.availableFilters}
           onSearchFilterChanged={this.handleSearchFilterChanged}
           onThumbnailModeToggled={this.handleThumbnailModeToggled}
-          thumbnailMode={this.state.thumbnailMode} />
+          onEditModeToggled={this.handleEditModeToggled}
+          thumbnailMode={this.state.thumbnailMode}
+          editMode={this.state.editMode} />
         <div style={{ padding: '.5rem', margin: '0px' }}>
           <h3 style={{color: 'white'}}>{this.state.filterString}</h3>
         </div>
@@ -136,7 +148,12 @@ class MainView extends Component {
             </Col>
           </Row>
           <Row noGutters={true}>
-            <Col md="auto"><Album images={this.props.images.items} thumbnailMode={this.state.thumbnailMode}/></Col>
+            <Col md="auto">
+              <Album
+                images={this.props.images.items}
+                thumbnailMode={this.state.thumbnailMode}
+                editMode={this.state.editMode}/>
+            </Col>
           </Row>
           <Row>
             <Col sm={{ size: 1, offset: 5 }}>

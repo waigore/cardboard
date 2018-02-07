@@ -18,7 +18,12 @@ import { shake } from 'react-animations';
 import Radium, { StyleRoot } from 'radium';
 import moment from 'moment';
 
-import {THUMBNAIL_MODE_LARGE, THUMBNAIL_MODE_SMALL} from '../views/MainView';
+import {
+  THUMBNAIL_MODE_LARGE,
+  THUMBNAIL_MODE_SMALL,
+  EDIT_MODE_EDIT,
+  EDIT_MODE_VIEW
+} from '../views/MainView';
 
 import {
   doDeleteImage
@@ -122,12 +127,16 @@ class ImageEntry extends Component {
 
   getCardClassName() {
     let className = "image-entry";
-    if (this.props.selectable && this.state.hover) {
+    if (this.state.hover) {
       className += " image-entry-hover";
     }
-    if (this.state.selected) {
+    
+    if (this.props.selected) {
       className += " image-entry-selected";
+    } else if (this.props.selectable) {
+      className += " image-entry-selectable";
     }
+
     return className;
   }
 
@@ -195,8 +204,7 @@ class Album extends Component {
     this.state = {
       cols: cols,
       imageRows: props.images ? this.splitEntriesByRows(props.images, cols) : [],
-      selectedImages: [],
-      refreshedAt: moment()
+      selectedImages: []
     }
 
     this.handleDeleteImage = this.handleDeleteImage.bind(this);
@@ -205,13 +213,19 @@ class Album extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    let thumbnailMode = nextProps.thumbnailMode || THUMBNAIL_MODE_LARGE;
+    let thumbnailMode = nextProps.thumbnailMode;
     let cols = thumbnailMode == THUMBNAIL_MODE_LARGE ? 3 : 6;
+    let editMode = nextProps.editMode;
 
-    this.setState({
+    let stateChange = {
       cols: cols,
       imageRows: this.splitEntriesByRows(nextProps.images, cols)
-    })
+    };
+    if (editMode == EDIT_MODE_VIEW) {
+      stateChange.selectedImages = [];
+    }
+
+    this.setState(stateChange);
   }
 
   handleDeleteImage(identifier) {
@@ -235,8 +249,7 @@ class Album extends Component {
     }
 
     this.setState({
-      selectedImages: newSelectedImages,
-      refreshedAt: moment()
+      selectedImages: newSelectedImages
     })
   }
 
@@ -290,8 +303,8 @@ class Album extends Component {
                         md={this.props.thumbnailMode == THUMBNAIL_MODE_LARGE ? 4 : 2 }
                         xs="12">
                         <ImageEntry
-                          selectable={true}
-                          selected={this.isImageEntrySelected(image)}
+                          selectable={this.props.editMode == EDIT_MODE_EDIT}
+                          selected={this.props.editMode == EDIT_MODE_EDIT && this.isImageEntrySelected(image)}
                           image={image}
                           onDelete={this.handleDeleteImage}
                           onSelect={ identifier => this.handleImageEntrySelect(image)}/>
