@@ -14,8 +14,6 @@ import {
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import FaTrash from 'react-icons/lib/fa/trash';
-import { shake } from 'react-animations';
-import Radium, { StyleRoot } from 'radium';
 import moment from 'moment';
 
 import {
@@ -29,17 +27,19 @@ import {
   doDeleteImage
 } from '../actions';
 
+import {
+  addEventListener,
+  removeEventListener
+} from '../actions/pubsub';
+
 import { range } from '../util';
 import './Album.css';
 
 const NUM_COLS = 3;
 
-const styles = {
-  infiniteShake: {
-    animation: 'infinite',
-    animationName: Radium.keyframes(shake, 'shake')
-  }
-}
+export const EVT_CLEAR_ALL = 'CLEAR_ALL';
+export const EVT_SELECT_ALL = 'SELECT_ALL';
+
 
 class ImageTags extends Component {
   constructor(props) {
@@ -130,7 +130,7 @@ class ImageEntry extends Component {
     if (this.state.hover) {
       className += " image-entry-hover";
     }
-    
+
     if (this.props.selected) {
       className += " image-entry-selected";
     } else if (this.props.selectable) {
@@ -210,6 +210,13 @@ class Album extends Component {
     this.handleDeleteImage = this.handleDeleteImage.bind(this);
     this.handleImageEntrySelect = this.handleImageEntrySelect.bind(this);
     this.isImageEntrySelected = this.isImageEntrySelected.bind(this);
+    this.clearAll = this.clearAll.bind(this);
+    this.selectAll = this.selectAll.bind(this);
+  }
+
+  componentDidMount() {
+    addEventListener(EVT_CLEAR_ALL, this.clearAll);
+    addEventListener(EVT_SELECT_ALL, this.selectAll);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -226,6 +233,18 @@ class Album extends Component {
     }
 
     this.setState(stateChange);
+  }
+
+  clearAll() {
+    this.setState({
+      selectedImages: []
+    });
+  }
+
+  selectAll() {
+    this.setState({
+      selectedImages: this.state.selectedImages.concat(this.props.images)
+    })
   }
 
   handleDeleteImage(identifier) {

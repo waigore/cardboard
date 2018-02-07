@@ -24,7 +24,7 @@
 
 .image-entry-selectable {
   animation: jiggle 0.2s infinite;
-  transform: rotate(-3deg);
+  transform: rotate(-2deg);
 }
 
 .image-entry-selected {

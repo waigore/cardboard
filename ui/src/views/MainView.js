@@ -4,13 +4,16 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import AppActionBar from '../components/AppActionBar';
-import Album from '../components/Album';
+import Album, { EVT_CLEAR_ALL, EVT_SELECT_ALL } from '../components/Album';
 import PageControl from '../components/PageControl';
 
 import {
   doGetAllSearchTerms,
   doFindImagesByCriteria
 } from '../actions';
+import {
+  emitEvent
+} from '../actions/pubsub';
 
 const PAGE_SIZE = 30;
 const PAGE_WINDOW_SIZE = 5;
@@ -40,6 +43,8 @@ class MainView extends Component {
     this.handleSearchFilterChanged = this.handleSearchFilterChanged.bind(this);
     this.handleThumbnailModeToggled = this.handleThumbnailModeToggled.bind(this);
     this.handleEditModeToggled = this.handleEditModeToggled.bind(this);
+    this.handleSelectAll = this.handleSelectAll.bind(this);
+    this.handleSelectClear = this.handleSelectClear.bind(this);
   }
 
   componentWillMount() {
@@ -111,6 +116,20 @@ class MainView extends Component {
     }
   }
 
+  handleSelectAll() {
+    if (this.state.editMode == EDIT_MODE_EDIT)
+    {
+      emitEvent(EVT_SELECT_ALL, null);
+    }
+  }
+
+  handleSelectClear() {
+    if (this.state.editMode == EDIT_MODE_EDIT)
+    {
+      emitEvent(EVT_CLEAR_ALL, null);
+    }
+  }
+
   handleEditModeToggled(toggleMode) {
     this.setState({
       editMode: toggleMode
@@ -131,8 +150,11 @@ class MainView extends Component {
           onSearchFilterChanged={this.handleSearchFilterChanged}
           onThumbnailModeToggled={this.handleThumbnailModeToggled}
           onEditModeToggled={this.handleEditModeToggled}
+          onSelectClear={this.handleSelectClear}
+          onSelectAll={this.handleSelectAll}
           thumbnailMode={this.state.thumbnailMode}
-          editMode={this.state.editMode} />
+          editMode={this.state.editMode}
+           />
         <div style={{ padding: '.5rem', margin: '0px' }}>
           <h3 style={{color: 'white'}}>{this.state.filterString}</h3>
         </div>

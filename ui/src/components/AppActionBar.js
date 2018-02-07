@@ -13,6 +13,9 @@ import FaList from 'react-icons/lib/fa/list';
 import FaThLarge from 'react-icons/lib/fa/th-large';
 import FaTh from 'react-icons/lib/fa/th';
 import FaEdit from 'react-icons/lib/fa/edit';
+import FaCloudDownload from 'react-icons/lib/fa/cloud-download';
+import FaSquare from 'react-icons/lib/fa/square';
+import FaSquareO from 'react-icons/lib/fa/square-o';
 
 import {
   THUMBNAIL_MODE_LARGE,
@@ -31,18 +34,31 @@ class AppActionBar extends React.Component {
 
     this.state = {
       values: []
-      /*
-      [
-        {value: 'persona5', label: 'persona5'},
-        {value: 'persona4', label: 'persona4'}
-      ]
-      */
     };
 
     this.handleTagFilterSelectChanged = this.handleTagFilterSelectChanged.bind(this);
     this.handleLargeThumbnailButtonClick = this.handleLargeThumbnailButtonClick.bind(this);
     this.handleSmallThumbnailButtonClick = this.handleSmallThumbnailButtonClick.bind(this);
     this.handleEditButtonClick = this.handleEditButtonClick.bind(this);
+    this.handleClearAllButtonClick = this.handleClearAllButtonClick.bind(this);
+    this.handleSelectAllButtonClick = this.handleSelectAllButtonClick.bind(this);
+    this.handleKeyDown = this.handleKeyDown.bind(this);
+  }
+
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleKeyDown);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleKeyDown);
+  }
+
+  handleKeyDown(evt) {
+    if (evt.keyCode == 27) { //escape
+      if (this.props.onEditModeToggled) {
+        this.props.onEditModeToggled(EDIT_MODE_VIEW);
+      }
+    }
   }
 
   handleTagFilterSelectChanged(values) {
@@ -50,6 +66,18 @@ class AppActionBar extends React.Component {
 
     if (this.props.onSearchFilterChanged) {
       this.props.onSearchFilterChanged(values);
+    }
+  }
+
+  handleClearAllButtonClick(evt) {
+    if (this.props.onSelectClear) {
+      this.props.onSelectClear();
+    }
+  }
+
+  handleSelectAllButtonClick(evt) {
+    if (this.props.onSelectAll) {
+      this.props.onSelectAll();
     }
   }
 
@@ -89,7 +117,7 @@ class AppActionBar extends React.Component {
           </Button>
         </ButtonGroup>
 
-        <ButtonGroup className="float-left">
+        <ButtonGroup className="float-left" style={{marginRight: "20px"}}>
           <Button outline={this.props.editMode != EDIT_MODE_EDIT}
             color="success"
             style={{ color : 'white', borderColor: 'white' }}
@@ -97,6 +125,33 @@ class AppActionBar extends React.Component {
               <FaEdit />
           </Button>
         </ButtonGroup>
+
+        {
+          this.props.editMode == EDIT_MODE_EDIT &&
+            <ButtonGroup className="float-left" style={{marginRight: "20px"}}>
+              <Button outline color="success"
+              style={{ color : 'white', borderColor: 'white' }}
+              onClick={evt => this.handleClearAllButtonClick(evt)}>
+                <FaSquareO />
+              </Button>
+              <Button outline color="success"
+              style={{ color : 'white', borderColor: 'white' }}
+              onClick={evt => this.handleSelectAllButtonClick(evt)}>
+                <FaSquare />
+              </Button>
+            </ButtonGroup>
+        }
+
+        {
+          this.props.editMode == EDIT_MODE_EDIT &&
+            <ButtonGroup className="float-left">
+              <Button outline color="success"
+              style={{ color : 'white', borderColor: 'white' }}>
+                <FaCloudDownload />
+              </Button>
+            </ButtonGroup>
+        }
+
         <div className="float-right">
           <Select
             style={{width: "250px", backgroundColor: 'transparent', borderColor: 'white' }}
