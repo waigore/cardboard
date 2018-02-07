@@ -120,9 +120,6 @@ class ImageEntry extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    this.setState({
-      selected: nextProps.selected
-    })
   }
 
   getCardClassName() {
@@ -159,7 +156,7 @@ class ImageEntry extends Component {
   }
 
   handleClick(evt, identifier) {
-    if (this.props.onSelect) {
+    if (this.props.onSelect && this.props.selectable) {
       this.props.onSelect(identifier);
     }
   }
@@ -242,8 +239,12 @@ class Album extends Component {
   }
 
   selectAll() {
+    let currSelectedImageIdentifiers = this.state.selectedImages.map(i => i.identifier);
+
     this.setState({
-      selectedImages: this.state.selectedImages.concat(this.props.images)
+      selectedImages: this.state.selectedImages.concat(
+                        this.props.images.filter(i => !currSelectedImageIdentifiers.includes(i.identifier))
+                      )
     })
   }
 
@@ -312,6 +313,14 @@ class Album extends Component {
       let rowNum = 0;
       return (
         <Container>
+          {
+            this.state.selectedImages.length > 0 &&
+            <Row>
+              <Col xs="12">
+                <div style={{color: 'white'}}>{this.state.selectedImages.length} images selected.</div>
+              </Col>
+            </Row>
+          }
           {
             this.state.imageRows.map(imageRow =>
                 <Row key={'row' + (rowNum++)} style={{paddingBottom: "10px", paddingTop: "10px"}}>
