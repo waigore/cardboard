@@ -14,6 +14,8 @@ import FaThLarge from 'react-icons/lib/fa/th-large';
 import FaTh from 'react-icons/lib/fa/th';
 import FaEdit from 'react-icons/lib/fa/edit';
 
+import {THUMBNAIL_MODE_LARGE, THUMBNAIL_MODE_SMALL} from '../views/MainView';
+
 import 'react-select/dist/react-select.css';
 import './AppActionBar.css';
 
@@ -47,13 +49,13 @@ class AppActionBar extends React.Component {
 
   handleLargeThumbnailButtonClick(evt) {
     if (this.props.onThumbnailModeToggled) {
-      this.props.onThumbnailModeToggled('large');
+      this.props.onThumbnailModeToggled(THUMBNAIL_MODE_LARGE);
     }
   }
 
   handleSmallThumbnailButtonClick(evt) {
     if (this.props.onThumbnailModeToggled) {
-      this.props.onThumbnailModeToggled('small');
+      this.props.onThumbnailModeToggled(THUMBNAIL_MODE_SMALL);
     }
   }
 
@@ -61,12 +63,12 @@ class AppActionBar extends React.Component {
     return (
       <div className="clearfix" style={{ padding: '.5rem', margin: '0px' }}>
         <ButtonGroup className="float-left" style={{marginRight: "20px"}}>
-          <Button outline color="success"
+          <Button outline={this.props.thumbnailMode != THUMBNAIL_MODE_LARGE} color="success"
             style={{ color : 'white', borderColor: 'white' }}
             onClick={evt => this.handleLargeThumbnailButtonClick(evt)}>
               <FaThLarge />
           </Button>
-          <Button outline color="success"
+          <Button outline={this.props.thumbnailMode != THUMBNAIL_MODE_SMALL} color="success"
             style={{ color : 'white', borderColor: 'white' }}
             onClick={evt => this.handleSmallThumbnailButtonClick(evt)}>
               <FaTh />

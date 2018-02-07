@@ -1,5 +1,12 @@
+@keyframes border-pulsate {
+    0%   { border-color: rgba(0, 255, 255, 1); }
+    50%  { border-color: rgba(0, 255, 255, 0); }
+    100% { border-color: rgba(0, 255, 255, 1); }
+}
+
 .image-entry {
   /*box-shadow: 2px 2px 7px 1px rgba(0,0,0,0.75);*/
+  border: 4px solid white;
 }
 
 .image-entry-hover {
@@ -7,7 +14,9 @@
 }
 
 .image-entry-selected {
-  background-color: #999;
+  /*background-color: #999;*/
+  border: 4px solid cyan;
+  animation: border-pulsate 2s infinite;
 }
 
 .image-tag-container {

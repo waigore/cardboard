@@ -18,6 +18,8 @@ import { shake } from 'react-animations';
 import Radium, { StyleRoot } from 'radium';
 import moment from 'moment';
 
+import {THUMBNAIL_MODE_LARGE, THUMBNAIL_MODE_SMALL} from '../views/MainView';
+
 import {
   doDeleteImage
 } from '../actions';
@@ -26,9 +28,6 @@ import { range } from '../util';
 import './Album.css';
 
 const NUM_COLS = 3;
-
-export const THUMBNAIL_MODE_LARGE = 'large';
-export const THUMBNAIL_MODE_SMALL = 'small';
 
 const styles = {
   infiniteShake: {

@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import AppActionBar from '../components/AppActionBar';
-import Album, { THUMBNAIL_MODE_LARGE, THUMBNAIL_MODE_SMALL } from '../components/Album';
+import Album from '../components/Album';
 import PageControl from '../components/PageControl';
 
 import {
@@ -15,6 +15,9 @@ import {
 const PAGE_SIZE = 30;
 const PAGE_WINDOW_SIZE = 5;
 
+export const THUMBNAIL_MODE_LARGE = 'large';
+export const THUMBNAIL_MODE_SMALL = 'small';
+
 class MainView extends Component {
   constructor(props) {
     super(props)
@@ -22,12 +25,12 @@ class MainView extends Component {
     this.state = {
       filterString: 'All',
       filters: [],
+      availableFilters: [],
       page: 1,
       pageFrom: 1,
       pageTo: 1,
       totalPages: 1,
-      thumbnailMode: THUMBNAIL_MODE_LARGE,
-      availableFilters: []
+      thumbnailMode: THUMBNAIL_MODE_LARGE
     }
 
     this.handlePageChanged = this.handlePageChanged.bind(this);
@@ -116,7 +119,8 @@ class MainView extends Component {
         <AppActionBar
           availableFilters={this.state.availableFilters}
           onSearchFilterChanged={this.handleSearchFilterChanged}
-          onThumbnailModeToggled={this.handleThumbnailModeToggled} />
+          onThumbnailModeToggled={this.handleThumbnailModeToggled}
+          thumbnailMode={this.state.thumbnailMode} />
         <div style={{ padding: '.5rem', margin: '0px' }}>
           <h3 style={{color: 'white'}}>{this.state.filterString}</h3>
         </div>
