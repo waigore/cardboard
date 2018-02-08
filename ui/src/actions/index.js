@@ -1,3 +1,5 @@
+import download from 'downloadjs';
+
 const API_ENDPOINT = 'http://localhost:5001/api';
 
 export const GET_ALL_SEARCH_TERMS = 'GET_ALL_SEARCH_TERMS';
@@ -51,6 +53,14 @@ export function imageDeleted(json) {
   }
 }
 
+export const GET_IMAGE_ZIP = 'GET_IMAGE_ZIP';
+export function getImageZip(identifiers) {
+  return {
+    type: GET_IMAGE_ZIP,
+    identifiers: identifiers
+  }
+}
+
 export function doGetAllSearchTerms() {
   return (dispatch) => {
     dispatch(getAllSearchTerms());
@@ -99,6 +109,24 @@ export function doDeleteImage(identifier) {
     })
     .then(response => response.json())
     .then(json => dispatch(imageDeleted(json)))
+    .catch(error => console.log('An error occurred.', error));
+  }
+}
+
+export function doGetImageZip(identifiers) {
+  return (dispatch) => {
+    dispatch(getImageZip(identifiers));
+
+    let apiUrl = `${API_ENDPOINT}/images/zip`;
+    return fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({identifiers})
+    })
+    .then(response => response.blob())
+    .then(blob => download(blob))
     .catch(error => console.log('An error occurred.', error));
   }
 }

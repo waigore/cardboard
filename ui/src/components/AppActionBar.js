@@ -42,6 +42,7 @@ class AppActionBar extends React.Component {
     this.handleEditButtonClick = this.handleEditButtonClick.bind(this);
     this.handleClearAllButtonClick = this.handleClearAllButtonClick.bind(this);
     this.handleSelectAllButtonClick = this.handleSelectAllButtonClick.bind(this);
+    this.handleDownloadButtonClick = this.handleDownloadButtonClick.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
@@ -78,6 +79,12 @@ class AppActionBar extends React.Component {
   handleSelectAllButtonClick(evt) {
     if (this.props.onSelectAll) {
       this.props.onSelectAll();
+    }
+  }
+
+  handleDownloadButtonClick(evt) {
+    if (this.props.onDownload) {
+      this.props.onDownload();
     }
   }
 
@@ -146,7 +153,8 @@ class AppActionBar extends React.Component {
           this.props.editMode == EDIT_MODE_EDIT &&
             <ButtonGroup className="float-left">
               <Button outline color="success"
-              style={{ color : 'white', borderColor: 'white' }}>
+              style={{ color : 'white', borderColor: 'white' }}
+              onClick={evt => this.handleDownloadButtonClick(evt)}>
                 <FaCloudDownload />
               </Button>
             </ButtonGroup>

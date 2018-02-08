@@ -24,7 +24,8 @@ import {
 } from '../views/MainView';
 
 import {
-  doDeleteImage
+  doDeleteImage,
+  doGetImageZip
 } from '../actions';
 
 import {
@@ -39,7 +40,7 @@ const NUM_COLS = 3;
 
 export const EVT_CLEAR_ALL = 'CLEAR_ALL';
 export const EVT_SELECT_ALL = 'SELECT_ALL';
-
+export const EVT_GET_IMAGE_ZIP = 'GET_IMAGE_ZIP';
 
 class ImageTags extends Component {
   constructor(props) {
@@ -209,11 +210,13 @@ class Album extends Component {
     this.isImageEntrySelected = this.isImageEntrySelected.bind(this);
     this.clearAll = this.clearAll.bind(this);
     this.selectAll = this.selectAll.bind(this);
+    this.getImageZip = this.getImageZip.bind(this);
   }
 
   componentDidMount() {
     addEventListener(EVT_CLEAR_ALL, this.clearAll);
     addEventListener(EVT_SELECT_ALL, this.selectAll);
+    addEventListener(EVT_GET_IMAGE_ZIP, this.getImageZip);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -246,6 +249,15 @@ class Album extends Component {
                         this.props.images.filter(i => !currSelectedImageIdentifiers.includes(i.identifier))
                       )
     })
+  }
+
+  getImageZip() {
+    let currSelectedImageIdentifiers = this.state.selectedImages.map(i => i.identifier);
+
+    if (currSelectedImageIdentifiers)
+    {
+      this.props.doGetImageZip(currSelectedImageIdentifiers);
+    }
   }
 
   handleDeleteImage(identifier) {
@@ -350,7 +362,8 @@ class Album extends Component {
 
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
-      doDeleteImage
+      doDeleteImage,
+      doGetImageZip
     }, dispatch);
 }
 

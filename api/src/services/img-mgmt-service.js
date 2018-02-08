@@ -4,6 +4,7 @@ const moment = require('moment');
 const Image = require('../sequelize/models').Image;
 const SearchTerm = require('../sequelize/models').SearchTerm;
 const Op = require('sequelize').Op;
+const util = require('../util');
 
 let formatImage = function(image) {
   return {
@@ -62,6 +63,26 @@ module.exports = {
         where: whereCond
       }).then(c => { return {total: c, images: displayImages}})
     })
+  },
+
+  getImageListForZip: function(identifiers) {
+    let whereCond = {
+      identifier: {
+        [Op.in]: identifiers
+      }
+    }
+    return Image.findAll({
+      where: whereCond
+    })
+    //.then(images => images.map(image => formatImage(image)))
+    .then(images => {
+      return images.map(image => ({
+        identifier: image.identifier,
+        filename: image.filename,
+        fullPath: util.getOutputFolderPath() + '/' + image.filename
+      }))
+    })
+    .then(files => ({files}))
   },
 
   deleteImage: function(identifier) {

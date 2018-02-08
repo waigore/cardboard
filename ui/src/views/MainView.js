@@ -4,7 +4,11 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import AppActionBar from '../components/AppActionBar';
-import Album, { EVT_CLEAR_ALL, EVT_SELECT_ALL } from '../components/Album';
+import Album, {
+  EVT_CLEAR_ALL,
+  EVT_SELECT_ALL,
+  EVT_GET_IMAGE_ZIP
+ } from '../components/Album';
 import PageControl from '../components/PageControl';
 
 import {
@@ -44,6 +48,7 @@ class MainView extends Component {
     this.handleThumbnailModeToggled = this.handleThumbnailModeToggled.bind(this);
     this.handleEditModeToggled = this.handleEditModeToggled.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
+    this.handleDownload = this.handleDownload.bind(this);
     this.handleSelectClear = this.handleSelectClear.bind(this);
   }
 
@@ -130,6 +135,13 @@ class MainView extends Component {
     }
   }
 
+  handleDownload(identifiers) {
+    if (this.state.editMode == EDIT_MODE_EDIT)
+    {
+      emitEvent(EVT_GET_IMAGE_ZIP, null);
+    }
+  }
+
   handleEditModeToggled(toggleMode) {
     this.setState({
       editMode: toggleMode
@@ -152,6 +164,7 @@ class MainView extends Component {
           onEditModeToggled={this.handleEditModeToggled}
           onSelectClear={this.handleSelectClear}
           onSelectAll={this.handleSelectAll}
+          onDownload={this.handleDownload}
           thumbnailMode={this.state.thumbnailMode}
           editMode={this.state.editMode}
            />
