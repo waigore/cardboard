@@ -2,6 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   var SearchTerm = sequelize.define('SearchTerm', {
     name: DataTypes.STRING,
+    sites: DataTypes.STRING,
     status: DataTypes.STRING,
     safeOnly: DataTypes.BOOLEAN,
     toExclude: DataTypes.BOOLEAN,

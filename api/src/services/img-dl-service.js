@@ -9,9 +9,11 @@ const config  = threads.config;
 const spawn   = threads.spawn;
 
 const imgMgmtService = require('./img-mgmt-service');
+const logging = require('../util/logging');
+
+const logger = logging.getRootLogger('imagedlservice');
 
 const IMG_LIMIT = 50;
-
 
 // Set base paths to thread scripts
 config.set({
@@ -23,19 +25,12 @@ config.set({
 const pool = new Pool(4);
 
 let getSearchTermIdRange = function(term) {
-  /*return Image.max('identifier', {
-    where: {
-      tags: {
-        [Op.like]: '%' + term.name + '%'
-      }
-    }
-  })*/
-  console.log("Term last downloaded: " + term.lastDownloadedId);
+  logger.info("Term last downloaded: " + term.lastDownloadedId);
   return new Promise((resolve, reject) => {
     resolve(term.lastDownloadedId);
   })
   .then(mx => {
-    console.log("Found max id:" + mx);
+    logger.info("Found max id:" + mx);
     if (!mx) return { term, min: 0, max: 0 }
     else return { term, min: parseInt(mx, 10), max: parseInt(mx, 10)+IMG_LIMIT }
   })
@@ -49,23 +44,32 @@ module.exports = {
   queueAllTags: function() {
     return imgMgmtService.getAllSearchTerms()
     .then(terms => {
+      let queuedTerms = [];
+      terms.forEach(term => {
+        let tag = term.name;
+        Promise.resolve(
+          getSearchTermIdRange(term)
+          .then(range => {
+            term.sites.forEach(site => {
+              logger.info("Pushing site:" + site + " tag: " + tag + " range: " + range);
+              queuedTerms.push(this.queueByRawTag(site, tag, range, IMG_LIMIT));
+            })
+          })
+        );
+      })
+      return queuedTerms;
+      /*
       return terms.map(term => {
-        console.log('Mapping', term.name);
+        logger.info('Mapping', term.name);
         let tag = formatTermToTag(term);
         return getSearchTermIdRange(term)
             .then(range => {
-              /*let realTag = tag;
-              if (range.min != 0 && range.max != 0) {
-                realTag = realTag + ` id:${range.min}..${range.max}`;
-              }*/
-              console.log('Queuing', tag, 'to find images');
-              return this.queueByRawTag(tag, range, IMG_LIMIT);
+              logger.info('Queuing', tag, 'to find images');
+              return this.queueByRawTag(term.sites[0], tag, range, IMG_LIMIT);
             });
-      })
+      })*/
     })
     .then(queuedTerms => {
-      //let p = Promise.all(queuedTerms);
-      //return p;
       return queuedTerms.reduce((promise, queuedTerm) => {
         return promise.then(() => Promise.resolve(queuedTerm))
       }, Promise.resolve());
@@ -75,25 +79,16 @@ module.exports = {
     })
   },
 
-  queueByRawTag: function(tag, range, limit) {
+  queueByRawTag: function(site, tag, range, limit) {
     let job = pool.run('find-image-worker.js')
-      .send({tag: tag, limit: limit, range: range});
+      .send({site: site, tag: tag, range: range, limit: limit});
     job.on('done', result => {
       if (result.error) {
-        console.log('Error finding images!', result);
+        logger.warn('Error finding images!', result);
         return result;
       }
-      /*
-      let arr1 = result.identifiers.splice(result.identifiers.length/2);
-      let dlJob1 = pool.run('download-image-worker.js')
-        .send({identifiers: arr1});
-      let dlJob2 = pool.run('download-image-worker.js')
-        .send({identifiers: result.identifiers});
-      */
-      //let dlJob = pool.run('download-image-worker.js')
-      //  .send({identifiers: result.identifiers});
     });
-    console.log("queued, returning " + tag);
+    logger.info("queued, returning " + tag);
     return tag;
   },
 

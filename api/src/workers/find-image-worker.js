@@ -1,10 +1,9 @@
 const fs = require('fs-extra');
-
 const Danbooru = require('danbooru');
-const booru = new Danbooru('waizer', '2yJ8XNHPkwNY4tIsHuye6U4xz6-KEvwOBfCbBz7N9dM');
 
 const Image = require('../sequelize/models').Image;
 const SearchTerm = require('../sequelize/models').SearchTerm;
+const Site = require('../sequelize/models').Site;
 const Op = require('sequelize').Op;
 const NoBooruPostsFoundError = require('../exceptions').NoBooruPostsFoundError;
 
@@ -12,7 +11,22 @@ const logging = require('../util/logging');
 
 const logger = logging.getLogger('image-search', 'imagesearch');
 
-let findBooruImagesByTag = function(tags, limit=200) {
+let getBooruSiteConfig = function(siteName) {
+  return Site.findOne({
+    where: {
+      name: siteName
+    }
+  })
+  .then(site => ({
+    name: site.name,
+    domain: site.domain,
+    apiUser: site.apiUser,
+    apiKey: site.apiKey
+  }));
+}
+
+let findBooruImagesByTag = function(booruSite, tags, limit=200) {
+  const booru = new Danbooru(booruSite.apiUser, booruSite.apiKey, { base: booruSite.domain });
   return booru.requestJson('posts', {
     limit: limit,
     tags: tags,
@@ -27,6 +41,7 @@ let acceptedExt = function(filename) {
 let info = (tag, msg) => logger.info(tag + ": " + msg);
 
 module.exports = function(input, done, progress) {
+  let site = input.site;
   let tag = input.tag;
   let limit = input.limit;
   let range = input.range;
@@ -38,7 +53,8 @@ module.exports = function(input, done, progress) {
 
   info(tag, 'Finding images for tag: ' + realTag + ', limit: ' + limit);
 
-  findBooruImagesByTag(realTag, limit)
+  getBooruSiteConfig(site)
+  .then(booruSite => findBooruImagesByTag(booruSite, realTag, limit))
   .then(posts => {
     info(tag, posts.length + ' posts retrieved');
     /*if (posts.length == 0) {

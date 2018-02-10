@@ -14,7 +14,7 @@ module.exports = {
   },
 
   getRootLogger: function(prefix) {
-    return this.getLogger('cardboard', prefix, stdout=true);
+    return this.getLogger('cardboard', prefix, 'info', true);
   },
 
   getLogger: function(name, prefix, level='info', stdout=true) {

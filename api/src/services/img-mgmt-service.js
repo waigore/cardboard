@@ -30,6 +30,7 @@ module.exports = {
       return terms.map(term => {
         return {
           name: term.name,
+          sites: term.sites.split(','),
           status: term.status,
           safeOnly: term.safeOnly,
           toExclude: term.toExclude,
