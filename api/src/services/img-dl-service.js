@@ -23,12 +23,16 @@ config.set({
 const pool = new Pool(4);
 
 let getSearchTermIdRange = function(term) {
-  return Image.max('identifier', {
+  /*return Image.max('identifier', {
     where: {
       tags: {
         [Op.like]: '%' + term.name + '%'
       }
     }
+  })*/
+  console.log("Term last downloaded: " + term.lastDownloadedId);
+  return new Promise((resolve, reject) => {
+    resolve(term.lastDownloadedId);
   })
   .then(mx => {
     console.log("Found max id:" + mx);
@@ -50,12 +54,12 @@ module.exports = {
         let tag = formatTermToTag(term);
         return getSearchTermIdRange(term)
             .then(range => {
-              let realTag = tag;
+              /*let realTag = tag;
               if (range.min != 0 && range.max != 0) {
                 realTag = realTag + ` id:${range.min}..${range.max}`;
-              }
-              console.log('Queuing', realTag, 'to find images');
-              return this.queueByRawTag(realTag, IMG_LIMIT);
+              }*/
+              console.log('Queuing', tag, 'to find images');
+              return this.queueByRawTag(tag, range, IMG_LIMIT);
             });
       })
     })
@@ -71,9 +75,9 @@ module.exports = {
     })
   },
 
-  queueByRawTag: function(tag, limit) {
+  queueByRawTag: function(tag, range, limit) {
     let job = pool.run('find-image-worker.js')
-      .send({tag: tag, limit: limit});
+      .send({tag: tag, limit: limit, range: range});
     job.on('done', result => {
       if (result.error) {
         console.log('Error finding images!', result);

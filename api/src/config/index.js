@@ -1,3 +1,3 @@
 module.exports = {
-  outputPath: 'C:/Cardboard'
+  outputPath: 'D:/Cardboard'
 }

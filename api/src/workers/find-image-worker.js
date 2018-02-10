@@ -4,6 +4,7 @@ const Danbooru = require('danbooru');
 const booru = new Danbooru('waizer', '2yJ8XNHPkwNY4tIsHuye6U4xz6-KEvwOBfCbBz7N9dM');
 
 const Image = require('../sequelize/models').Image;
+const SearchTerm = require('../sequelize/models').SearchTerm;
 const Op = require('sequelize').Op;
 const NoBooruPostsFoundError = require('../exceptions').NoBooruPostsFoundError;
 
@@ -23,17 +24,26 @@ let acceptedExt = function(filename) {
   return exts.some(ext => filename.endsWith(ext));
 }
 
+let info = (tag, msg) => logger.info(tag + ": " + msg);
+
 module.exports = function(input, done, progress) {
   let tag = input.tag;
   let limit = input.limit;
-  logger.info('Finding images for tag: ' + tag + ', limit: ' + limit);
+  let range = input.range;
 
-  findBooruImagesByTag(tag, limit)
+  let realTag = tag;
+  if (range.min != 0 && range.max != 0) {
+    realTag = realTag + ` id:${range.min}..${range.max}`;
+  }
+
+  info(tag, 'Finding images for tag: ' + realTag + ', limit: ' + limit);
+
+  findBooruImagesByTag(realTag, limit)
   .then(posts => {
-    logger.info(posts.length + ' posts retrieved.');
-    if (posts.length == 0) {
-      throw new NoPostsFoundError(tag);
-    }
+    info(tag, posts.length + ' posts retrieved');
+    /*if (posts.length == 0) {
+      throw new NoBooruPostsFoundError(tag);
+    }*/
     return posts
       .filter(post => post.md5 && post.file_url && acceptedExt(post.file_url))
       .map(post => {
@@ -64,20 +74,59 @@ module.exports = function(input, done, progress) {
     .then(imgs => imgs.map(i => i.identifier))
     .then(identifiers => preRecs.filter(r => !identifiers.includes(r.identifier)))
   })
+
   .then(recs => {
-    logger.info("Bulk creating " + recs.length + " recs");
+    info(tag, "Filtered image list length: "+ recs.length);
+    info(tag, recs.map(rec => parseInt(rec.identifier, 10)));
+    let currMax = recs.length > 0 ? Math.max(...recs.map(rec => parseInt(rec.identifier, 10))) : range.max;
+    info(tag, "Currmax=" + currMax);
+
+    return Image.max('identifier')
+      .then(mxIdentifier => Math.min(parseInt(mxIdentifier, 10), currMax))
+      .then(mx => {
+        info(tag, "Updating lastDownloadedId to " + mx);
+        return SearchTerm.update(
+          { lastDownloadedId : mx.toString()},
+          { where: {
+              name: tag
+            }
+          }
+        )
+      })
+      .then(() => recs).catch(err => { throw err});
+  })
+
+  .then(recs => {
+    info(tag, "Bulk creating " + recs.length + " recs");
     return Image.bulkCreate(recs).then(() => recs);
   })
+  /*
   .then(insertedRecs => {
-    logger.info('Image search done.')
+    return Image.max('identifier', {
+      where: {
+        tags: {
+          [Op.like]: '%' + tag + '%'
+        }
+      }
+    }).then(mx => {
+        logger.info("Updating lastDownloadedId for tag " + tag + " to " + mx);
+        return SearchTerm.update(
+          { lastDownloadedId : mx.toString() },
+          { where: { name: tag } }
+        );
+      }).then(() => insertedRecs);
+  })
+  */
+  .then(insertedRecs => {
+    info(tag, 'Image search done.')
     done({identifiers: insertedRecs.map(rec => rec.identifier)});
   })
-  .catch(NoPostsFoundError, (e) => {
-    logger.info('No images found!');
+  .catch(NoBooruPostsFoundError, (e) => {
+    info(tag, 'No images found!');
     done({identifiers: []})
   })
   .catch(err => {
-    logger.warn('Error finding images!', err);
+    logger.warn(tag + ': Error finding images!', err);
     done({error: err})
   })
 }

@@ -32,7 +32,8 @@ module.exports = {
           name: term.name,
           status: term.status,
           safeOnly: term.safeOnly,
-          toExclude: term.toExclude
+          toExclude: term.toExclude,
+          lastDownloadedId: term.lastDownloadedId
         }
       });
     });

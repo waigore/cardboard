@@ -4,7 +4,8 @@ module.exports = (sequelize, DataTypes) => {
     name: DataTypes.STRING,
     status: DataTypes.STRING,
     safeOnly: DataTypes.BOOLEAN,
-    toExclude: DataTypes.BOOLEAN
+    toExclude: DataTypes.BOOLEAN,
+    lastDownloadedId: DataTypes.STRING
   }, {
     classMethods: {
       associate: function(models) {
