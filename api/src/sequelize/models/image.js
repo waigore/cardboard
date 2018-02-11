@@ -5,7 +5,13 @@ module.exports = (sequelize, DataTypes) => {
     md5: DataTypes.STRING,
     status: DataTypes.STRING,
     filename: DataTypes.STRING,
-    site: DataTypes.STRING,
+    site: {
+      type: DataTypes.STRING,
+      references: {
+        model: "Site",
+        key: "name"
+      }
+    },
     fileUrl: DataTypes.STRING,
     tags: DataTypes.STRING,
     artists: DataTypes.STRING,
@@ -14,12 +20,12 @@ module.exports = (sequelize, DataTypes) => {
     starred: DataTypes.BOOLEAN,
     uploadedAt: DataTypes.DATE,
     downloadedAt: DataTypes.DATE
-  }, {
-    classMethods: {
-      associate: function(models) {
-        // associations can be defined here
-      }
-    }
   });
+
+  Image.associate = models => {
+    console.log("Associating image...")
+    Image.belongsTo(models.Site, { foreignKey: "site", targetKey: "name" });
+  }
+
   return Image;
 };

@@ -172,7 +172,8 @@ class MainView extends Component {
   handleShowStarredToggled(toggled) {
     console.log("Toggling show starred to " + toggled)
     this.setState({
-      showStarred: toggled
+      showStarred: toggled,
+      page: 1
     }, () => {
       this.findImages();
     });

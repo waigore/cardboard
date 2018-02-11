@@ -6,12 +6,12 @@ module.exports = (sequelize, DataTypes) => {
     type: DataTypes.STRING,
     apiUser: DataTypes.STRING,
     apiKey: DataTypes.STRING
-  }, {
-    classMethods: {
-      associate: function(models) {
-        // associations can be defined here
-      }
-    }
   });
+
+  Site.associate = models => {
+    console.log("Associating site...")
+    Site.hasMany(models.Image, { foreignKey: "site", sourceKey: "name;" })
+  }
+
   return Site;
 };

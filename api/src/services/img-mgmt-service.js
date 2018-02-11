@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const moment = require('moment');
 
 const Image = require('../sequelize/models').Image;
+const Site = require('../sequelize/models').Site;
 const SearchTerm = require('../sequelize/models').SearchTerm;
 const Op = require('sequelize').Op;
 const util = require('../util');
@@ -12,9 +13,10 @@ let formatImage = function(image) {
     status: image.status,
     thumbnail: 'thumbnails/' + image.filename,
     filename: image.filename,
+    externalUrl: image.Site.domain + '/posts/' + image.identifier,
     tags: image.tags.split(' ').splice(0, 3),
-    characters: image.characters && image.characters.trim() ? image.characters.split(' ') : [],
-    copyrights: image.copyrights && image.copyrights.trim() ? image.copyrights.split(' ') : [],
+    characters: image.characters && image.characters.trim() ? image.characters.split(' ').splice(0, 3) : [],
+    copyrights: image.copyrights && image.copyrights.trim() ? image.copyrights.split(' ').splice(0, 3) : [],
     starred: image.starred,
     uploadedAt: moment(image.uploadedAt)
   }
@@ -96,7 +98,10 @@ module.exports = {
       limit: numPerPage,
       order: [
         ['identifier', 'DESC']
-      ]
+      ],
+      include: [{
+        model: Site
+      }]
     })
     .then(images => {
       return images.map(image => formatImage(image))

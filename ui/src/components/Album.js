@@ -13,9 +13,11 @@ import {
   Row } from 'reactstrap';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import { Link } from 'react-router-dom';
 import FaTrash from 'react-icons/lib/fa/trash';
 import FaStar from 'react-icons/lib/fa/star';
 import FaStarO from 'react-icons/lib/fa/star-o';
+import FaExternalLinkSquare from 'react-icons/lib/fa/external-link-square';
 import moment from 'moment';
 
 import {
@@ -192,6 +194,7 @@ class ImageEntry extends Component {
           <div>
             <div className="float-left">
               <Star style={{cursor: 'pointer'}} onClick={evt => this.handleStarIconClick(evt, this.props.image.identifier)}/>
+              <Link to={this.props.image.externalUrl} target="_blank"><FaExternalLinkSquare /></Link>
               <FaTrash style={{cursor: 'pointer'}} onClick={evt => this.handleDeleteIconClick(evt, this.props.image.identifier)}/>
             </div>
             <div className="float-right">
