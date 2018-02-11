@@ -19,11 +19,12 @@ export function searchTermsReceived(json) {
 }
 
 export const FIND_IMAGES_BY_CRITERIA = 'FIND_IMAGES_BY_CRITERIA';
-export function findImagesByCriteria(tag, page) {
+export function findImagesByCriteria(tag, page, starredOnly) {
   return {
     type: FIND_IMAGES_BY_CRITERIA,
     tag: tag,
-    page: page
+    page: page,
+    starredOnly: starredOnly
   }
 }
 
@@ -53,6 +54,24 @@ export function imageDeleted(json) {
   }
 }
 
+export const STAR_IMAGE = 'STAR_IMAGE';
+export function starImage(identifier, starred) {
+  return {
+    type: STAR_IMAGE,
+    identifier: identifier,
+    starred: starred
+  }
+}
+
+export const IMAGE_STARRED = 'IMAGE_STARRED';
+export function imageStarred(json) {
+  return {
+    type: IMAGE_STARRED,
+    data: json,
+    receivedAt: Date.now()
+  }
+}
+
 export const GET_IMAGE_ZIP = 'GET_IMAGE_ZIP';
 export function getImageZip(identifiers) {
   return {
@@ -75,9 +94,9 @@ export function doGetAllSearchTerms() {
 }
 
 
-export function doFindImagesByCriteria(tag, page) {
+export function doFindImagesByCriteria(tag, page, showStarred) {
   return (dispatch) => {
-    dispatch(findImagesByCriteria(tag, page));
+    dispatch(findImagesByCriteria(tag, page, showStarred));
 
     let apiUrl = `${API_ENDPOINT}/images/byCriteria`;
     return fetch(apiUrl, {
@@ -86,7 +105,7 @@ export function doFindImagesByCriteria(tag, page) {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({tag, page})
+      body: JSON.stringify({tag, page, starredOnly: showStarred})
     })
     .then(response => response.json())
     .then(json => dispatch(imagesReceived(json)))
@@ -109,6 +128,25 @@ export function doDeleteImage(identifier) {
     })
     .then(response => response.json())
     .then(json => dispatch(imageDeleted(json)))
+    .catch(error => console.log('An error occurred.', error));
+  }
+}
+
+export function doStarImage(identifier, starred) {
+  return (dispatch) => {
+    dispatch(starImage(identifier, starred));
+
+    let apiUrl = `${API_ENDPOINT}/images/star`;
+    return fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({identifier, starred})
+    })
+    .then(response => response.json())
+    .then(json => dispatch(imageStarred(json)))
     .catch(error => console.log('An error occurred.', error));
   }
 }

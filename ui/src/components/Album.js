@@ -14,6 +14,8 @@ import {
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import FaTrash from 'react-icons/lib/fa/trash';
+import FaStar from 'react-icons/lib/fa/star';
+import FaStarO from 'react-icons/lib/fa/star-o';
 import moment from 'moment';
 
 import {
@@ -25,6 +27,7 @@ import {
 
 import {
   doDeleteImage,
+  doStarImage,
   doGetImageZip
 } from '../actions';
 
@@ -45,6 +48,14 @@ export const EVT_GET_IMAGE_ZIP = 'GET_IMAGE_ZIP';
 class ImageTags extends Component {
   constructor(props) {
     super(props);
+
+    this.handleTagClicked = this.handleTagClicked.bind(this);
+  }
+
+  handleTagClicked(tag) {
+    if (this.props.onTagClicked) {
+      this.props.onTagClicked(tag);
+    }
   }
 
   renderTags() {
@@ -66,34 +77,12 @@ class ImageTags extends Component {
       }));
     }
 
-
     return tags.map(tag => {
       if (tag.type == 'character')
-        return <div key={'tag_' + tag.tag} className="image-tag image-tag-character">{tag.tag}</div>;
+        return <div key={'tag_' + tag.tag} className="image-tag image-tag-character" onClick={(evt) => this.handleTagClicked(tag.tag)}>{tag.tag}</div>;
       else
-        return <div key={'tag_' + tag.tag} className="image-tag">{tag.tag}</div>;
+        return <div key={'tag_' + tag.tag} className="image-tag" onClick={(evt) => this.handleTagClicked(tag.tag)}>{tag.tag}</div>;
     })
-
-
-    /*
-    if (this.props.characters) {
-      return this.props.characters.map(tag => {
-        return <div key={'tag_' + tag} className="image-tag image-tag-character">{tag}</div>
-      })
-    }
-    else {
-      return this.props.general.map(tag => {
-        return <div key={'tag_' + tag} className="image-tag">{tag}</div>
-      })
-    }
-    */
-
-    /*
-    return tags.map(tag => {
-      return <div key={'tag_' + tag} className="image-tag image-tag-character">{tag}</div>
-    })*/
-
-
   }
 
   render() {
@@ -111,16 +100,21 @@ class ImageEntry extends Component {
 
     this.state = {
       selected: false,
-      hover: false
+      hover: false,
+      starred: props.image ? props.image.starred : false
     }
 
     this.handleDeleteIconClick = this.handleDeleteIconClick.bind(this);
+    this.handleStarIconClick = this.handleStarIconClick.bind(this);
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
+    this.setState({
+      starred: nextProps.image ? nextProps.image.starred: false
+    })
   }
 
   getCardClassName() {
@@ -141,6 +135,15 @@ class ImageEntry extends Component {
   handleDeleteIconClick(evt, identifier) {
     if (this.props.onDelete) {
       this.props.onDelete(identifier);
+    }
+  }
+
+  handleStarIconClick(evt, identifier) {
+    if (this.props.onStar) {
+      this.props.onStar(identifier, !this.state.starred);
+      this.setState({
+        starred: !this.state.starred
+      });
     }
   }
 
@@ -167,6 +170,8 @@ class ImageEntry extends Component {
       return <div></div>
     }
 
+    var Star = this.state.starred ? FaStar : FaStarO;
+
     return (
       <Card className={"" + this.getCardClassName()}
           onMouseEnter={this.handleMouseEnter}
@@ -182,10 +187,16 @@ class ImageEntry extends Component {
           <ImageTags
             general={this.props.image.tags}
             characters={this.props.image.characters}
-            copyrights={this.props.image.copyrights} />
-          <div className="d-flex justify-content-between align-items-center">
-            <FaTrash style={{cursor: 'pointer'}} onClick={evt => this.handleDeleteIconClick(evt, this.props.image.identifier)}/>
-            <small className="text-muted">{moment(this.props.image.uploadedAt).fromNow()}</small>
+            copyrights={this.props.image.copyrights}
+            onTagClicked={this.props.onTagClicked} />
+          <div>
+            <div className="float-left">
+              <Star style={{cursor: 'pointer'}} onClick={evt => this.handleStarIconClick(evt, this.props.image.identifier)}/>
+              <FaTrash style={{cursor: 'pointer'}} onClick={evt => this.handleDeleteIconClick(evt, this.props.image.identifier)}/>
+            </div>
+            <div className="float-right">
+              <small className="text-muted">{moment(this.props.image.uploadedAt).fromNow()}</small>
+            </div>
           </div>
         </CardBody>
       </Card>
@@ -206,6 +217,7 @@ class Album extends Component {
     }
 
     this.handleDeleteImage = this.handleDeleteImage.bind(this);
+    this.handleStarImage = this.handleStarImage.bind(this);
     this.handleImageEntrySelect = this.handleImageEntrySelect.bind(this);
     this.isImageEntrySelected = this.isImageEntrySelected.bind(this);
     this.clearAll = this.clearAll.bind(this);
@@ -262,6 +274,10 @@ class Album extends Component {
 
   handleDeleteImage(identifier) {
     this.props.doDeleteImage(identifier);
+  }
+
+  handleStarImage(identifier, starred) {
+    this.props.doStarImage(identifier, starred);
   }
 
   handleImageEntrySelect(image) {
@@ -350,7 +366,9 @@ class Album extends Component {
                           selectable={this.props.editMode == EDIT_MODE_EDIT}
                           selected={this.props.editMode == EDIT_MODE_EDIT && this.isImageEntrySelected(image)}
                           image={image}
+                          onTagClicked={this.props.onTagClicked}
                           onDelete={this.handleDeleteImage}
+                          onStar={this.handleStarImage}
                           onSelect={ identifier => this.handleImageEntrySelect(image)}/>
                       </Col>
                     )
@@ -367,6 +385,7 @@ class Album extends Component {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
       doDeleteImage,
+      doStarImage,
       doGetImageZip
     }, dispatch);
 }

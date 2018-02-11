@@ -29,13 +29,19 @@ app.get('/api/terms/all', (req, res) => {
 })
 
 app.post('/api/images/byCriteria', (req, res) => {
-  imgMgmtService.findImagesForDisplay(req.body.tag, req.body.page)
+  imgMgmtService.findImagesForDisplay(req.body)
   .then(result => res.status(200).send(result))
   .catch(error => {console.log(error); res.status(500).send(error)});
 });
 
 app.post('/api/images/delete', (req, res) => {
   imgMgmtService.deleteImage(req.body.identifier)
+  .then(result => res.status(200).send(result))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+});
+
+app.post('/api/images/star', (req, res) => {
+  imgMgmtService.starImage(req.body.identifier, req.body.starred)
   .then(result => res.status(200).send(result))
   .catch(error => {console.log(error); res.status(500).send(error)});
 });

@@ -3,6 +3,7 @@ import {combineReducers} from 'redux';
 import {
   IMAGES_RECEIVED,
   IMAGE_DELETED,
+  IMAGE_STARRED,
   SEARCH_TERMS_RECEIVED
 } from '../actions';
 
@@ -15,6 +16,12 @@ let processImages = function(images) {
     return image;
   })
   return newArr;
+}
+
+let starImage = function(images, identifier, starred) {
+  let i2 = images.filter(i => i.identifier == identifier)[0];
+  i2.starred = starred;
+  return images;
 }
 
 const terms = function(state = {items: [], receivedAt: null}, action) {
@@ -42,6 +49,11 @@ const images = function(state = {items: [], total: -1, receivedAt: null}, action
         items: state.items.filter(image => image.identifier != action.data.identifier),
         receivedAt: action.receivedAt
       });
+    case IMAGE_STARRED:
+      return Object.assign({}, state, {
+        items: starImage(state.items, action.data.identifier, action.data.starred),
+        receivedAt: action.receivedAt
+      })
     default:
       return state;
   }

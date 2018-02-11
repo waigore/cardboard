@@ -3,6 +3,8 @@ import { Col, Container, Row } from 'reactstrap';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
+import FaStar from 'react-icons/lib/fa/star';
+
 import AppActionBar from '../components/AppActionBar';
 import Album, {
   EVT_CLEAR_ALL,
@@ -40,20 +42,23 @@ class MainView extends Component {
       pageTo: 1,
       totalPages: 1,
       thumbnailMode: THUMBNAIL_MODE_LARGE,
-      editMode: EDIT_MODE_VIEW
+      editMode: EDIT_MODE_VIEW,
+      showStarred: false
     }
 
     this.handlePageChanged = this.handlePageChanged.bind(this);
     this.handleSearchFilterChanged = this.handleSearchFilterChanged.bind(this);
     this.handleThumbnailModeToggled = this.handleThumbnailModeToggled.bind(this);
     this.handleEditModeToggled = this.handleEditModeToggled.bind(this);
+    this.handleShowStarredToggled = this.handleShowStarredToggled.bind(this);
+    this.handleImageTagClicked = this.handleImageTagClicked.bind(this);
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleDownload = this.handleDownload.bind(this);
     this.handleSelectClear = this.handleSelectClear.bind(this);
   }
 
   componentWillMount() {
-    this.props.doFindImagesByCriteria("", this.state.page);
+    this.props.doFindImagesByCriteria("", this.state.page, this.state.showStarred);
     this.props.doGetAllSearchTerms();
   }
 
@@ -94,7 +99,7 @@ class MainView extends Component {
     let searchTag = filters.map(filter => filter.value).join(' ');
     console.log("Search tag: " + searchTag + " page: " + this.state.page);
 
-    this.props.doFindImagesByCriteria(searchTag, this.state.page);
+    this.props.doFindImagesByCriteria(searchTag, this.state.page, this.state.showStarred);
   }
 
   handlePageChanged(newPage) {
@@ -112,6 +117,21 @@ class MainView extends Component {
         filters: filterValues,
         filterString: filterString,
         page: 1}, () => {
+      this.findImages();
+    });
+  }
+
+  handleImageTagClicked(tag) {
+    console.log("handleImageTagClicked tag:" + tag);
+    let tagObj = { value: tag, label: tag };
+    let availableFilters = this.state.availableFilters.map(f => f);
+    availableFilters.push(tagObj);
+    this.setState({
+        filters: [tagObj],
+        filterString: tag,
+        availableFilters: availableFilters,
+        page: 1
+      }, () => {
       this.findImages();
     });
   }
@@ -149,6 +169,15 @@ class MainView extends Component {
     });
   }
 
+  handleShowStarredToggled(toggled) {
+    console.log("Toggling show starred to " + toggled)
+    this.setState({
+      showStarred: toggled
+    }, () => {
+      this.findImages();
+    });
+  }
+
   render() {
     return (
       <div>
@@ -157,14 +186,21 @@ class MainView extends Component {
           onSearchFilterChanged={this.handleSearchFilterChanged}
           onThumbnailModeToggled={this.handleThumbnailModeToggled}
           onEditModeToggled={this.handleEditModeToggled}
+          onShowStarredToggled={this.handleShowStarredToggled}
           onSelectClear={this.handleSelectClear}
           onSelectAll={this.handleSelectAll}
           onDownload={this.handleDownload}
           thumbnailMode={this.state.thumbnailMode}
           editMode={this.state.editMode}
+          showStarred={this.state.showStarred}
            />
         <div style={{ padding: '.5rem', margin: '0px' }}>
-          <h3 style={{color: 'white'}}>{this.state.filterString}</h3>
+          <h3 style={{color: 'white'}}>{this.state.filterString}
+          {
+            this.state.showStarred &&
+            <FaStar />
+          }
+          </h3>
         </div>
         <Container fluid>
           <Row>
@@ -192,7 +228,8 @@ class MainView extends Component {
               <Album
                 images={this.props.images.items}
                 thumbnailMode={this.state.thumbnailMode}
-                editMode={this.state.editMode}/>
+                editMode={this.state.editMode}
+                onTagClicked={this.handleImageTagClicked}/>
             </Col>
           </Row>
           <Row>

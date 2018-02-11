@@ -74,6 +74,7 @@ module.exports = function(input, done, progress) {
               artists: post.tag_string_artist,
               characters: post.tag_string_character,
               copyrights: post.tag_string_copyright,
+              starred: false,
               uploadedAt: post.created_at
             }
           });

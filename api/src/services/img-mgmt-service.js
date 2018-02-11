@@ -15,6 +15,7 @@ let formatImage = function(image) {
     tags: image.tags.split(' ').splice(0, 3),
     characters: image.characters && image.characters.trim() ? image.characters.split(' ') : [],
     copyrights: image.copyrights && image.copyrights.trim() ? image.copyrights.split(' ') : [],
+    starred: image.starred,
     uploadedAt: moment(image.uploadedAt)
   }
 }
@@ -63,7 +64,12 @@ module.exports = {
     });
   },
 
-  findImagesForDisplay: function(tag, page, numPerPage=30) {
+  findImagesForDisplay: function(options) {
+    let tag = options.tag || "";
+    let page = options.page || 1;
+    let numPerPage = options.numPerPage || 30;
+    let starredOnly = options.starredOnly || false;
+
     let searchTag = '%' + tag.replace(' ', '%') + '%';
     let offset = (page-1)*numPerPage;
     let whereCond = {
@@ -79,8 +85,11 @@ module.exports = {
           [Op.like]: searchTag
         },
       }
-
     }
+    if (starredOnly) {
+      whereCond.starred = true;
+    }
+
     return Image.findAll({
       where: whereCond,
       offset: offset,
@@ -117,6 +126,26 @@ module.exports = {
       }))
     })
     .then(files => ({files}))
+  },
+
+  starImage: function(identifier, starred) {
+    return Image.findOne({
+      where: {
+        identifier: identifier
+      }
+    })
+    .then(image => {
+      return Image.update(
+        { starred: starred },
+        { where: {
+            identifier: identifier
+          }
+        }
+      ).then(affectedRows => image);
+    })
+    .then(() => {
+      return {identifier: identifier, starred, status: 'OK'}
+    });
   },
 
   deleteImage: function(identifier) {

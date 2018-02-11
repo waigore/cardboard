@@ -6,7 +6,7 @@ import {
   Container,
   Row,
 } from 'reactstrap';
-import Select from 'react-select';
+import {Creatable} from 'react-select';
 import {Link} from 'react-router-dom';
 
 import FaList from 'react-icons/lib/fa/list';
@@ -16,6 +16,7 @@ import FaEdit from 'react-icons/lib/fa/edit';
 import FaCloudDownload from 'react-icons/lib/fa/cloud-download';
 import FaSquare from 'react-icons/lib/fa/square';
 import FaSquareO from 'react-icons/lib/fa/square-o';
+import FaStar from 'react-icons/lib/fa/star';
 
 import {
   THUMBNAIL_MODE_LARGE,
@@ -43,6 +44,7 @@ class AppActionBar extends React.Component {
     this.handleClearAllButtonClick = this.handleClearAllButtonClick.bind(this);
     this.handleSelectAllButtonClick = this.handleSelectAllButtonClick.bind(this);
     this.handleDownloadButtonClick = this.handleDownloadButtonClick.bind(this);
+    this.handleShowStarredButtonClick = this.handleShowStarredButtonClick.bind(this);
     this.handleKeyDown = this.handleKeyDown.bind(this);
   }
 
@@ -85,6 +87,12 @@ class AppActionBar extends React.Component {
   handleDownloadButtonClick(evt) {
     if (this.props.onDownload) {
       this.props.onDownload();
+    }
+  }
+
+  handleShowStarredButtonClick(evt) {
+    if (this.props.onShowStarredToggled) {
+      this.props.onShowStarredToggled(!this.props.showStarred);
     }
   }
 
@@ -160,8 +168,8 @@ class AppActionBar extends React.Component {
             </ButtonGroup>
         }
 
-        <div className="float-right">
-          <Select
+        <div className="float-right" style={{marginLeft: "20px"}}>
+          <Creatable
             style={{width: "250px", backgroundColor: 'transparent', borderColor: 'white' }}
             multi
             name="tag-filter"
@@ -171,7 +179,17 @@ class AppActionBar extends React.Component {
             value={this.state.values}
           />
         </div>
+
+        <ButtonGroup className="float-right">
+          <Button outline={this.props.showStarred} color="success"
+          style={{ color : 'white', borderColor: 'white' }}
+          onClick={this.handleShowStarredButtonClick}>
+            <FaStar />
+          </Button>
+        </ButtonGroup>
       </div>
+
+
     );
   }
 }
