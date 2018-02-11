@@ -329,6 +329,7 @@ class Album extends Component {
       return (
         <Container>
           {
+            this.props.editMode == EDIT_MODE_EDIT &&
             this.state.selectedImages.length > 0 &&
             <Row>
               <Col xs="12">

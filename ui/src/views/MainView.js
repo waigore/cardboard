@@ -61,8 +61,7 @@ class MainView extends Component {
     if (nextProps.images.receivedAt != this.props.images.receivedAt) {
       let imageTotal = nextProps.images.total;
       let numPages = Math.ceil(imageTotal/PAGE_SIZE);
-      //let currPage = 1;
-      let currPageFrom = 1;
+      let currPageFrom = Math.max(this.state.page - Math.floor(PAGE_WINDOW_SIZE/2), 1);
       let currPageTo = Math.min(currPageFrom+PAGE_WINDOW_SIZE-1, numPages);
       console.log("currPageFrom: " + currPageFrom);
       console.log("currPageTo: " + currPageTo);
@@ -107,18 +106,14 @@ class MainView extends Component {
 
   handleSearchFilterChanged(filterValues) {
     console.log("Filter changed: " + filterValues);
-    this.setState({filters: filterValues}, () => {
+    let filterString = filterValues.length == 0 ? 'All' : filterValues.reduce((s, item) => s + ' ' + item.label, 'Tag: ');
+
+    this.setState({
+        filters: filterValues,
+        filterString: filterString,
+        page: 1}, () => {
       this.findImages();
     });
-
-    if (filterValues.length == 0)
-    {
-      this.setState({filterString: 'All'});
-    }
-    else {
-      let filterString = filterValues.reduce((s, item) => s + ' ' + item.label, 'Tag: ');
-      this.setState({filterString: filterString});
-    }
   }
 
   handleSelectAll() {
@@ -182,6 +177,16 @@ class MainView extends Component {
                 onPageChanged={this.handlePageChanged}/>
             </Col>
           </Row>
+          {
+            this.state.editMode == EDIT_MODE_VIEW &&
+            <Row>
+              <Col xs="12">
+                <div style={{color: 'white'}}>
+                Showing {(this.state.page-1)*PAGE_SIZE+1} to {Math.min(this.state.page*PAGE_SIZE, this.props.images.total)} of {this.props.images.total} images.
+                </div>
+              </Col>
+            </Row>
+          }
           <Row noGutters={true}>
             <Col md="auto">
               <Album

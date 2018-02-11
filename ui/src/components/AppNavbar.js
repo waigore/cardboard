@@ -35,7 +35,7 @@ class AppNavbar extends Component {
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
               <NavItem>
-                <NavLink href="https://github.com/reactstrap/reactstrap">Github</NavLink>
+                <NavLink href="https://github.com/waigore/cardboard">Github</NavLink>
               </NavItem>
               <UncontrolledDropdown nav>
                 <DropdownToggle nav caret>
