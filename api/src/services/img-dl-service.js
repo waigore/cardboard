@@ -23,12 +23,20 @@ config.set({
 });
 
 const pool = new Pool(4);
+pool.on('error', (job, error) => {
+  logger.warn('Job errored: ', job, error);
+})
 
 let getSearchTermIdRange = function(term) {
   logger.info("Term last downloaded: " + term.lastDownloadedId);
-  return new Promise((resolve, reject) => {
-    resolve(term.lastDownloadedId);
+  return Image.max('identifier', {
+    where: {
+      tags: {
+        [Op.like]: '%' + term.name + '%'
+      }
+    }
   })
+  .then(mxIdentifier => term.lastDownloadedId == null ? mxIdentifier : term.lastDownloadedId)
   .then(mx => {
     logger.info("Found max id:" + mx);
     if (!mx) return { term, min: 0, max: 0 }
@@ -107,6 +115,11 @@ module.exports = {
 
       let job2 = pool.run('download-image-worker.js')
         .send({identifiers: imgIdentifiers});
+
+      return imgIdentifiers;
+    })
+    .then(imgIdentifiers => {
+      return {status: 'OK', identifiers: imgIdentifiers}
     })
     .catch(NoImagesFoundError, (e) => {
       return {status: 'OK', identifiers: []}

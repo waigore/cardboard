@@ -286,6 +286,9 @@ class Album extends Component {
   }
 
   isImageEntrySelected(image) {
+    if (!image) {
+      return false;
+    }
     let identifiers = this.state.selectedImages.map(i => i.identifier);
     console.log('Selected: ' + identifiers);
     return identifiers.includes(image.identifier);

@@ -19,6 +19,17 @@ let formatImage = function(image) {
   }
 }
 
+let formatSearchTerm = function(term) {
+  return {
+    name: term.name,
+    sites: term.sites.split(','),
+    status: term.status,
+    safeOnly: term.safeOnly,
+    toExclude: term.toExclude,
+    lastDownloadedId: term.lastDownloadedId
+  };
+}
+
 module.exports = {
   getAllSearchTerms: function() {
     return SearchTerm.findAll({
@@ -28,14 +39,26 @@ module.exports = {
     })
     .then(terms => {
       return terms.map(term => {
-        return {
-          name: term.name,
-          sites: term.sites.split(','),
-          status: term.status,
-          safeOnly: term.safeOnly,
-          toExclude: term.toExclude,
-          lastDownloadedId: term.lastDownloadedId
-        }
+        return formatSearchTerm(term);
+      });
+    });
+  },
+
+  getSearchTermsByCriteria: function(options) {
+    let whereCond = {};
+    if (options.activeOnly) {
+      whereCond.status = 'ACTIVE';
+    }
+    if (options.toExclude) {
+      whereCond.toExclude = true;
+    }
+
+    return SearchTerm.findAll({
+      where: whereCond
+    })
+    .then(terms => {
+      return terms.map(term => {
+        return formatSearchTerm(term);
       });
     });
   },
@@ -45,9 +68,18 @@ module.exports = {
     let offset = (page-1)*numPerPage;
     let whereCond = {
       status: 'DOWNLOADED',
-      tags: {
-        [Op.like]: searchTag
+      [Op.or]: {
+        tags: {
+          [Op.like]: searchTag
+        },
+        characters: {
+          [Op.like]: searchTag
+        },
+        copyrights: {
+          [Op.like]: searchTag
+        },
       }
+
     }
     return Image.findAll({
       where: whereCond,
