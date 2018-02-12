@@ -23,9 +23,6 @@ config.set({
 });
 
 const pool = new Pool(4);
-pool.on('error', (job, error) => {
-  logger.warn('Job errored: ', job, error);
-})
 
 let getSearchTermIdRange = function(term) {
   logger.info("Term last downloaded: " + term.lastDownloadedId);
@@ -92,10 +89,13 @@ module.exports = {
       .send({site: site, tag: tag, range: range, limit: limit});
     job.on('done', result => {
       if (result.error) {
-        logger.warn('Error finding images!', result);
-        return result;
+        logger.warn('Error finding images!' + result);
       }
+      return result;
     });
+    job.on('error', err => {
+      logger.warn('Find-image-worker error! tag: ' + tag + ' error: ' + err);
+    })
     logger.info("queued, returning " + tag);
     return tag;
   },

@@ -17,7 +17,10 @@ let downloadImageWithResult = function(imgDl) {
       logger.info('Downloading ' + imgDl.identifier + '...');
       return util.downloadImage(imgDl.url, imgDl.filename);
     })
-    .then(() => {
+    .then((result) => {
+      if (!result) {
+        throw 'Failed';
+      }
       logger.info(imgDl.identifier + ' done!');
       return Image.update(
         {status: 'DOWNLOADED', downloadedAt: moment()},

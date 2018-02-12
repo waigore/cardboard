@@ -26,7 +26,7 @@ module.exports = {
       .toFile(outFilename)
       .then(() => true)
       .catch(err => {
-        logger.warn('Error generating thumbnail for image ' + imgFilename + '!', err);
+        logger.warn('Error generating thumbnail for image ' + imgFilename + '! ' + err);
         return false;
       });
   },
@@ -38,7 +38,7 @@ module.exports = {
       })
       .then(() => true)
       .catch(err => {
-        logger.warn("Error downloading image!", err);
+        logger.warn("Error downloading image! " + err);
         return false;
       });
   },
