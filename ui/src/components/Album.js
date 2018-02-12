@@ -199,6 +199,12 @@ class ImageEntry extends Component {
             </div>
             <div className="float-right">
               <small className="text-muted">{moment(this.props.image.uploadedAt).fromNow()}</small>
+              {
+                this.props.image.artists && this.props.image.artists.length > 0 &&
+                <span style={{cursor: 'pointer'}} onClick={evt => this.props.onTagClicked && this.props.onTagClicked(this.props.image.artists[0])}>
+                  <small className="text-muted"> by {this.props.image.artists[0]}</small>
+                </span>
+              }
             </div>
           </div>
         </CardBody>

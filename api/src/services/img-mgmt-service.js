@@ -17,6 +17,7 @@ let formatImage = function(image) {
     tags: image.tags.split(' ').splice(0, 3),
     characters: image.characters && image.characters.trim() ? image.characters.split(' ').splice(0, 3) : [],
     copyrights: image.copyrights && image.copyrights.trim() ? image.copyrights.split(' ').splice(0, 3) : [],
+    artists: image.artists && image.artists.trim() ? image.artists.split(' ').splice(0, 3) : [],
     starred: image.starred,
     uploadedAt: moment(image.uploadedAt)
   }
@@ -86,6 +87,9 @@ module.exports = {
         copyrights: {
           [Op.like]: searchTag
         },
+        artists: {
+          [Op.like]: searchTag
+        }
       }
     }
     if (starredOnly) {

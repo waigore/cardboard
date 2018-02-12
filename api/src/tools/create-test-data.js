@@ -10,8 +10,11 @@ let images = [
     identifier: 10000,
     filename: 'link.jpg',
     tags: 'zelda',
-    characters: 'link',
-    copyrights: 'zelda',
+    characters: 'link bokoblins',
+    copyrights: 'the_legend_of_zelda',
+    artists: 'nintendo',
+    status: 'DOWNLOADED',
+    starred: true,
     uploadedAt: moment().subtract(4, 'days')
   },
   {
@@ -19,7 +22,10 @@ let images = [
     filename: 'link02.jpg',
     tags: 'zelda',
     characters: 'link',
-    copyrights: 'zelda',
+    copyrights: 'the_legend_of_zelda',
+    artists: 'nintendo',
+    status: 'DOWNLOADED',
+    starred: false,
     uploadedAt: moment().subtract(3, 'days')
   },
   {
@@ -27,7 +33,10 @@ let images = [
     filename: 'link03.jpg',
     tags: 'zelda',
     characters: 'link',
-    copyrights: 'zelda',
+    copyrights: 'the_legend_of_zelda',
+    artists: 'nintendo',
+    status: 'DOWNLOADED',
+    starred: false,
     uploadedAt: moment().subtract(2, 'days')
   },
   {
@@ -35,7 +44,10 @@ let images = [
     filename: 'link04.jpg',
     tags: 'zelda',
     characters: 'link',
-    copyrights: 'zelda',
+    copyrights: 'the_legend_of_zelda',
+    artists: 'nintendo',
+    status: 'DOWNLOADED',
+    starred: false,
     uploadedAt: moment().subtract(1, 'days')
   },
   {
@@ -43,7 +55,10 @@ let images = [
     filename: 'link05.jpg',
     tags: 'zelda',
     characters: 'link',
-    copyrights: 'zelda',
+    copyrights: 'the_legend_of_zelda',
+    artists: 'nintendo',
+    status: 'DOWNLOADED',
+    starred: false,
     uploadedAt: moment()
   }
 ]
