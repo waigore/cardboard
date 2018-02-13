@@ -31,6 +31,10 @@ let findBooruImagesByTag = function(booruSite, tags, limit=200) {
   return booru.requestJson('posts', {
     limit: limit,
     tags: tags,
+  })
+  .catch(err => {
+    logger.warn(tags + ": Error finding booru images! error: " + err);
+    throw err;
   });
 }
 
