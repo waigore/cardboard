@@ -1,6 +1,8 @@
 import React from 'react';
 import { Pagination, PaginationItem, PaginationLink } from 'reactstrap';
 
+import './PageControl.css';
+
 class PageControl extends React.Component {
   constructor(props) {
     super(props);
