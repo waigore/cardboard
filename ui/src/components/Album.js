@@ -10,7 +10,12 @@ import {
   CardSubtitle,
   Col,
   Container,
-  Row } from 'reactstrap';
+  Popover,
+  PopoverHeader,
+  PopoverBody,
+  Row,
+  Tooltip
+ } from 'reactstrap';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { Link } from 'react-router-dom';
@@ -51,19 +56,35 @@ class ImageTags extends Component {
   constructor(props) {
     super(props);
 
+    this.state = {
+      morePopoverOpen: false
+    }
+
     this.handleTagClicked = this.handleTagClicked.bind(this);
+    this.toggleMorePopover = this.toggleMorePopover.bind(this);
   }
 
   handleTagClicked(tag) {
+    this.setState({
+        morePopoverOpen: false
+    });
+
     if (this.props.onTagClicked) {
       this.props.onTagClicked(tag);
     }
   }
 
-  renderTags() {
-    let tags = [];
+  toggleMorePopover() {
+    this.setState({
+      morePopoverOpen: !this.state.morePopoverOpen
+    })
+  }
+
+  renderMoreTags() {
+    let moreTags = [];
+
     if (this.props.characters) {
-      tags = tags.concat(this.props.characters.map(tag => {
+      moreTags = moreTags.concat(this.props.characters.slice(2).map(tag => {
         return {
           tag: tag,
           type: 'character'
@@ -71,7 +92,53 @@ class ImageTags extends Component {
       }));
     }
     if (this.props.general) {
-      tags = tags.concat(this.props.general.map(tag => {
+      moreTags = moreTags.concat(this.props.general.slice(3).map(tag => {
+        return {
+          tag: tag,
+          type: 'general'
+        }
+      }));
+    }
+
+    if (moreTags.length == 0) {
+      return <div></div>;
+    }
+    else {
+      return (
+        <div>
+          <div id={"more-" + this.props.identifier} className="image-tag" onClick={evt => this.toggleMorePopover()}>...</div>
+          <Popover placement="top"
+            isOpen={this.state.morePopoverOpen}
+            target={"more-" + this.props.identifier}
+            toggle={this.toggleMorePopover}>
+            <PopoverHeader>More tags</PopoverHeader>
+            <PopoverBody>
+              {
+                moreTags.map(tag => {
+                  if (tag.type == 'character')
+                    return <div key={'tag_' + tag.tag} className="image-tag image-tag-character" onClick={(evt) => this.handleTagClicked(tag.tag)}>{tag.tag}</div>;
+                  else
+                    return <div key={'tag_' + tag.tag} className="image-tag" onClick={(evt) => this.handleTagClicked(tag.tag)}>{tag.tag}</div>;
+                })
+              }
+            </PopoverBody>
+          </Popover>
+        </div>);
+    }
+  }
+
+  renderTags() {
+    let tags = [];
+    if (this.props.characters) {
+      tags = tags.concat(this.props.characters.slice(0, 2).map(tag => {
+        return {
+          tag: tag,
+          type: 'character'
+        }
+      }));
+    }
+    if (this.props.general) {
+      tags = tags.concat(this.props.general.slice(0, 3).map(tag => {
         return {
           tag: tag,
           type: 'general'
@@ -90,7 +157,7 @@ class ImageTags extends Component {
   render() {
     return (
       <div className="image-tag-container">
-        {this.renderTags()}
+        {this.renderTags()} {this.renderMoreTags()}
       </div>
     )
   }
@@ -103,7 +170,8 @@ class ImageEntry extends Component {
     this.state = {
       selected: false,
       hover: false,
-      starred: props.image ? props.image.starred : false
+      starred: props.image ? props.image.starred : false,
+      uploadedAtTooltipOpen: false
     }
 
     this.handleDeleteIconClick = this.handleDeleteIconClick.bind(this);
@@ -111,6 +179,7 @@ class ImageEntry extends Component {
     this.handleMouseEnter = this.handleMouseEnter.bind(this);
     this.handleMouseLeave = this.handleMouseLeave.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.toggleUploadedAtTooltip = this.toggleUploadedAtTooltip.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -132,6 +201,12 @@ class ImageEntry extends Component {
     }
 
     return className;
+  }
+
+  toggleUploadedAtTooltip() {
+    this.setState({
+      uploadedAtTooltipOpen: !this.state.uploadedAtTooltipOpen
+    })
   }
 
   handleDeleteIconClick(evt, identifier) {
@@ -187,6 +262,7 @@ class ImageEntry extends Component {
         </a>
         <CardBody>
           <ImageTags
+            identifier={this.props.image.identifier}
             general={this.props.image.tags}
             characters={this.props.image.characters}
             copyrights={this.props.image.copyrights}
@@ -198,7 +274,10 @@ class ImageEntry extends Component {
               <FaTrash style={{cursor: 'pointer'}} onClick={evt => this.handleDeleteIconClick(evt, this.props.image.identifier)}/>
             </div>
             <div className="float-right">
-              <small className="text-muted">{moment(this.props.image.uploadedAt).fromNow()}</small>
+              <small className="text-muted" id={"uploadedAt-" + this.props.image.identifier }>{moment(this.props.image.uploadedAt).fromNow()}</small>
+              <Tooltip placement="top" isOpen={this.state.uploadedAtTooltipOpen} target={"uploadedAt-" + this.props.image.identifier} toggle={this.toggleUploadedAtTooltip}>
+                {"Uploaded at: " + moment(this.props.image.uploadedAt).format("YYYY-MM-DD hh:mm:ss")}
+              </Tooltip>
               {
                 this.props.image.artists && this.props.image.artists.length > 0 &&
                 <span style={{cursor: 'pointer'}} onClick={evt => this.props.onTagClicked && this.props.onTagClicked(this.props.image.artists[0])}>
