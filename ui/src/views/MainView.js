@@ -4,6 +4,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
 import FaStar from 'react-icons/lib/fa/star';
+import FaTimesCircle from 'react-icons/lib/fa/times-circle';
 
 import AppActionBar from '../components/AppActionBar';
 import Album, {
@@ -128,7 +129,7 @@ class MainView extends Component {
     availableFilters.push(tagObj);
     this.setState({
         filters: [tagObj],
-        filterString: tag,
+        filterString: "Tag: " + tag,
         availableFilters: availableFilters,
         page: 1
       }, () => {
@@ -200,6 +201,10 @@ class MainView extends Component {
           {
             this.state.showStarred &&
             <FaStar />
+          }
+          {
+            this.state.filters.length > 0 &&
+            <FaTimesCircle onClick={evt => this.handleSearchFilterChanged([])} />
           }
           </h3>
         </div>
