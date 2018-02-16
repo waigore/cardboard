@@ -4,7 +4,8 @@ import {
   IMAGES_RECEIVED,
   IMAGE_DELETED,
   IMAGE_STARRED,
-  SEARCH_TERMS_RECEIVED
+  SEARCH_TERMS_RECEIVED,
+  SEARCH_TERM_CREATED
 } from '../actions';
 
 const SERVER_ENDPOINT = 'http://localhost:5001';
@@ -31,6 +32,11 @@ const terms = function(state = {items: [], receivedAt: null}, action) {
         items: action.data.terms,
         receivedAt: action.receivedAt
       });
+    case SEARCH_TERM_CREATED:
+      return Object.assign({}, state, {
+        items: state.items.concat([action.data.term]),
+        receivedAt: action.receivedAt
+      })
     default:
       return state;
   }

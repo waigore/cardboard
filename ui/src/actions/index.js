@@ -18,6 +18,23 @@ export function searchTermsReceived(json) {
   }
 }
 
+export const CREATE_SEARCH_TERM = 'CREATE_SEARCH_TERM';
+export function createSearchTerm(tag) {
+  return {
+    type: CREATE_SEARCH_TERM,
+    tag: tag
+  }
+}
+
+export const SEARCH_TERM_CREATED = 'SEARCH_TERM_CREATED';
+export function searchTermCreated(json) {
+  return {
+    type: SEARCH_TERM_CREATED,
+    data: json,
+    receivedAt: Date.now()
+  }
+}
+
 export const FIND_IMAGES_BY_CRITERIA = 'FIND_IMAGES_BY_CRITERIA';
 export function findImagesByCriteria(tag, page, starredOnly) {
   return {
@@ -93,6 +110,24 @@ export function doGetAllSearchTerms() {
   }
 }
 
+export function doCreateSearchTerm(tag) {
+  return (dispatch) => {
+    dispatch(createSearchTerm(tag));
+
+    let apiUrl = `${API_ENDPOINT}/terms/create`;
+    return fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({name: tag})
+    })
+    .then(response => response.json())
+    .then(json => dispatch(searchTermCreated(json)))
+    .catch(error => console.log('An error occurred.', error));
+  }
+}
 
 export function doFindImagesByCriteria(tag, page, showStarred) {
   return (dispatch) => {

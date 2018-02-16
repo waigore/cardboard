@@ -14,10 +14,10 @@ let formatImage = function(image) {
     thumbnail: 'thumbnails/' + image.filename,
     filename: image.filename,
     externalUrl: image.Site.domain + '/posts/' + image.identifier,
-    tags: image.tags.split(' ').splice(0, 3),
-    characters: image.characters && image.characters.trim() ? image.characters.split(' ').splice(0, 3) : [],
-    copyrights: image.copyrights && image.copyrights.trim() ? image.copyrights.split(' ').splice(0, 3) : [],
-    artists: image.artists && image.artists.trim() ? image.artists.split(' ').splice(0, 3) : [],
+    tags: image.tags.split(' '),
+    characters: image.characters && image.characters.trim() ? image.characters.split(' ') : [],
+    copyrights: image.copyrights && image.copyrights.trim() ? image.copyrights.split(' ') : [],
+    artists: image.artists && image.artists.trim() ? image.artists.split(' ') : [],
     starred: image.starred,
     uploadedAt: moment(image.uploadedAt)
   }
@@ -46,6 +46,41 @@ module.exports = {
         return formatSearchTerm(term);
       });
     });
+  },
+
+  createSearchTerm: function(options) {
+    let name = options.name;
+    let sites = options.sites || 'danbooru';
+
+    return SearchTerm.findAll({
+      where: {
+        name: name
+      }
+    })
+    .then(terms => {
+      if (terms.length == 0) {
+        return SearchTerm.create({
+          name,
+          sites,
+          status: 'ACTIVE',
+          safeOnly: false,
+          toExclude: false
+        })
+      }
+      else {
+        return SearchTerm.update({
+          status: 'ACTIVE'
+        }, { where: { name: name } })
+      }
+    })
+    .then(() => {
+      return SearchTerm.findOne({
+        where: {
+          name: name
+        }
+      })
+    })
+    .then(term => formatSearchTerm(term))
   },
 
   getSearchTermsByCriteria: function(options) {

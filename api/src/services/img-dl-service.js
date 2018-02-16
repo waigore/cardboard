@@ -57,7 +57,7 @@ module.exports = {
           .then(range => {
             term.sites.forEach(site => {
               logger.info("Pushing site:" + site + " tag: " + tag + " range: " + range);
-              queuedTerms.push(this.queueByRawTag(site, tag, range, IMG_LIMIT));
+              queuedTerms.push(this.queueByRawTag({site: site, tag: tag, range: range, limit: IMG_LIMIT}));
             })
           })
         );
@@ -84,7 +84,16 @@ module.exports = {
     })
   },
 
-  queueByRawTag: function(site, tag, range, limit) {
+  queueByRawTag: function(options) {
+    let site = options.site || 'danbooru';
+    let tag = options.tag;
+    let range = options.range || Promise.resolve(getSearchTermIdRange(tag));
+    let limit = options.limit || 200;
+
+    if (!tag) {
+      return {'status': 'error', 'error': 'No tag specified!'}
+    }
+
     let job = pool.run('find-image-worker.js')
       .send({site: site, tag: tag, range: range, limit: limit});
     job.on('done', result => {
@@ -97,7 +106,7 @@ module.exports = {
       logger.warn('Find-image-worker error! tag: ' + tag + ' error: ' + err);
     })
     logger.info("queued, returning " + tag);
-    return tag;
+    return {'status': 'OK', tag: tag };
   },
 
   startImageDownload: function() {

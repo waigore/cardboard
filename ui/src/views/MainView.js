@@ -5,6 +5,7 @@ import { bindActionCreators } from 'redux';
 
 import FaStar from 'react-icons/lib/fa/star';
 import FaTimesCircle from 'react-icons/lib/fa/times-circle';
+import FaPlusCircle from 'react-icons/lib/fa/plus-circle';
 
 import AppActionBar from '../components/AppActionBar';
 import Album, {
@@ -15,6 +16,7 @@ import Album, {
 import PageControl from '../components/PageControl';
 
 import {
+  doCreateSearchTerm,
   doGetAllSearchTerms,
   doFindImagesByCriteria
 } from '../actions';
@@ -56,6 +58,7 @@ class MainView extends Component {
     this.handleSelectAll = this.handleSelectAll.bind(this);
     this.handleDownload = this.handleDownload.bind(this);
     this.handleSelectClear = this.handleSelectClear.bind(this);
+    this.createSearchTerm = this.createSearchTerm.bind(this);
   }
 
   componentWillMount() {
@@ -103,6 +106,17 @@ class MainView extends Component {
     this.props.doFindImagesByCriteria(searchTag, this.state.page, this.state.showStarred);
   }
 
+  createSearchTerm() {
+    //this.props.doCreateSearchTerm(tag);
+    const {filters, availableFilters} = this.state;
+    let tagsToAdd = filters.filter(f => availableFilters.filter(af => af.value == f.value).length == 0);
+    console.log("Adding these tags as search terms: ", tagsToAdd);
+
+    if (tagsToAdd) {
+      this.props.doCreateSearchTerm(tagsToAdd[0].value);
+    }
+  }
+
   handlePageChanged(newPage) {
     console.log("Page changed: " + newPage);
     this.setState({ page : newPage }, () => {
@@ -125,12 +139,12 @@ class MainView extends Component {
   handleImageTagClicked(tag) {
     console.log("handleImageTagClicked tag:" + tag);
     let tagObj = { value: tag, label: tag };
-    let availableFilters = this.state.availableFilters.map(f => f);
-    availableFilters.push(tagObj);
+    //let availableFilters = this.state.availableFilters.map(f => f);
+    //availableFilters.push(tagObj);
     this.setState({
         filters: [tagObj],
         filterString: "Tag: " + tag,
-        availableFilters: availableFilters,
+        //availableFilters: availableFilters,
         page: 1
       }, () => {
       this.findImages();
@@ -203,6 +217,10 @@ class MainView extends Component {
             <FaStar />
           }
           {
+            this.state.filters.some(f => this.state.availableFilters.filter(af => af.value == f.value).length == 0)
+            && <FaPlusCircle onClick={evt => this.createSearchTerm()}/>
+          }
+          {
             this.state.filters.length > 0 &&
             <FaTimesCircle onClick={evt => this.handleSearchFilterChanged([])} />
           }
@@ -265,6 +283,7 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
     return bindActionCreators({
       doGetAllSearchTerms,
+      doCreateSearchTerm,
       doFindImagesByCriteria
     }, dispatch);
 }

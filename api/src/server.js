@@ -28,6 +28,12 @@ app.get('/api/terms/all', (req, res) => {
   .catch(error => {console.log(error); res.status(500).send(error)});
 })
 
+app.post('/api/terms/create', (req, res) => {
+  imgMgmtService.createSearchTerm(req.body)
+  .then(term => res.status(200).send({status: 'OK', term}))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+})
+
 app.post('/api/images/byCriteria', (req, res) => {
   imgMgmtService.findImagesForDisplay(req.body)
   .then(result => res.status(200).send(result))
@@ -65,6 +71,13 @@ app.get('/api/imagedl/find', (req, res) => {
   .then(result => res.status(200).send({status: result.status}))
   .catch(error => {console.log(error); res.status(500).send(error)});
 });
+
+app.post('/api/imagedl/findByCriteria', (req, res) => {
+  Promise.resolve()
+  .then(() => imgDlService.queueByRawTag(req.body))
+  .then(result => res.status(200).send(result))
+  .catch(error => {console.log(error); res.status(500).send(error)});
+})
 
 app.get('/api/imagedl/download', (req, res) => {
   imgDlService.startImageDownload()
